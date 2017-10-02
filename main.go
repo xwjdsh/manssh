@@ -9,7 +9,6 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Name = name
 	app.Usage = useage
 	app.Version = version
 	app.Flags = flags()
@@ -30,6 +29,6 @@ func commands() []cli.Command {
 		{Name: "update", Usage: "update existing ssh config record", Action: update},
 		{Name: "delete", Usage: "delete existing ssh config record", Action: delete},
 		{Name: "rename", Usage: "rename existing ssh config record", Action: rename},
-		{Name: "export", Usage: "export ssh config record", Action: export},
+		{Name: "backup", Usage: "backup ssh config record", Action: backup},
 	}
 }
