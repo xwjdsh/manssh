@@ -34,7 +34,11 @@ func saveHosts(hosts []*sshconfig.SSHHost) error {
 		buffer.WriteString(fmt.Sprintf("    hostname %s\n", host.HostName))
 		buffer.WriteString(fmt.Sprintf("    port %d\n", host.Port))
 	}
-	return ioutil.WriteFile(path, buffer.Bytes(), 0644)
+	if err := ioutil.WriteFile(path, buffer.Bytes(), 0644); err != nil {
+		printErrorFlag()
+		return cli.NewExitError(err, 1)
+	}
+	return nil
 }
 
 func parseHost(alias, hostStr string) *sshconfig.SSHHost {
@@ -92,10 +96,10 @@ func printHost(host *sshconfig.SSHHost) {
 func argumentsCheck(c *cli.Context, min, max int) error {
 	arguments := c.Args()
 	var err error
-	if len(arguments) < min {
+	if min > 0 && len(arguments) < min {
 		err = errors.New("too few arguments")
 	}
-	if len(arguments) > max {
+	if max > 0 && len(arguments) > max {
 		err = errors.New("too many arguments")
 	}
 	if err != nil {

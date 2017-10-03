@@ -26,7 +26,7 @@ func list(c *cli.Context) error {
 		hosts = searchHosts
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("Display %d records:\n\n", len(hosts))
+	whiteBoldColor.Printf("Display %d records.\n\n", len(hosts))
 	for _, host := range hosts {
 		printHost(host)
 	}
@@ -43,19 +43,16 @@ func add(c *cli.Context) error {
 	hostMap := getHostsMap(hosts)
 	if _, ok := hostMap[newAlias]; ok {
 		printErrorFlag()
-		return cli.NewExitError("new ssh alias already exists", 1)
+		return cli.NewExitError(fmt.Sprintf("'%s' ssh alias already exists", newAlias), 1)
 	}
 	host := parseHost(newAlias, hostStr)
 	hosts = append(hosts, host)
 	if err := saveHosts(hosts); err != nil {
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
+		return err
 	}
 	printSuccessFlag()
 	whiteBoldColor.Printf("'%s' alias config added successfully\n\n", newAlias)
 	printHost(host)
-	return nil
-
 	return nil
 }
 
@@ -65,7 +62,42 @@ func update(c *cli.Context) error {
 }
 
 func delete(c *cli.Context) error {
-	fmt.Println("delete command")
+	if err := argumentsCheck(c, 1, -1); err != nil {
+		return err
+	}
+	hosts, _ := sshconfig.ParseSSHConfig(path)
+	hostMap := getHostsMap(hosts)
+	for _, alias := range c.Args() {
+		if _, ok := hostMap[alias]; !ok {
+			printErrorFlag()
+			return cli.NewExitError(fmt.Sprintf("'%s' ssh alias not found", alias), 1)
+		}
+	}
+	newHosts := []*sshconfig.SSHHost{}
+	for _, host := range hosts {
+		newAlias := []string{}
+		for _, hostAlias := range host.Host {
+			isDelete := false
+			for _, deleteAlias := range c.Args() {
+				if hostAlias == deleteAlias {
+					isDelete = true
+					break
+				}
+			}
+			if !isDelete {
+				newAlias = append(newAlias, hostAlias)
+			}
+		}
+		host.Host = newAlias
+		if len(host.Host) > 0 {
+			newHosts = append(newHosts, host)
+		}
+	}
+	if err := saveHosts(newHosts); err != nil {
+		return err
+	}
+	printSuccessFlag()
+	whiteBoldColor.Printf("deleted '%d' alias config\n", len(c.Args()))
 	return nil
 }
 
@@ -94,8 +126,7 @@ func rename(c *cli.Context) error {
 		}
 	}
 	if err := saveHosts(hosts); err != nil {
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
+		return err
 	}
 	printSuccessFlag()
 	whiteBoldColor.Printf("Rename from '%s' to '%s'\n\n", oldName, newName)
@@ -120,6 +151,6 @@ func backup(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 	printSuccessFlag()
-	fmt.Printf("backup ssh config to '%s' success", backupPath)
+	whiteBoldColor.Printf("backup ssh config to '%s' success", backupPath)
 	return nil
 }
