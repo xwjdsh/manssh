@@ -1,51 +1,16 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
-	"strings"
 
-	"github.com/fatih/color"
 	"github.com/mikkeloscar/sshconfig"
 	"github.com/urfave/cli"
 )
 
 var (
-	path            string
-	whiteBoldColor  = color.New(color.FgWhite, color.Bold)
-	yellowBoldColor = color.New(color.FgYellow, color.Bold)
-	successColor    = color.New(color.BgGreen, color.FgWhite)
-	errorColor      = color.New(color.BgRed, color.FgWhite)
+	path string
 )
-
-func saveHosts(hosts []*sshconfig.SSHHost) error {
-	var buffer bytes.Buffer
-	for _, host := range hosts {
-		buffer.WriteString(fmt.Sprintf("Host %s\n", strings.Join(host.Host, " ")))
-		buffer.WriteString(fmt.Sprintf("    user %s\n", host.User))
-		buffer.WriteString(fmt.Sprintf("    hostname %s\n", host.HostName))
-		buffer.WriteString(fmt.Sprintf("    port %d\n", host.Port))
-	}
-	return ioutil.WriteFile(path, buffer.Bytes(), 0644)
-}
-
-func formatHost(host *sshconfig.SSHHost) string {
-	return fmt.Sprintf("%s@%s:%d", host.User, host.HostName, host.Port)
-}
-
-func printSuccessFlag() {
-	successColor.Printf("%-10s", " success")
-}
-
-func printErrorFlag() {
-	errorColor.Printf("%-8s", " error")
-}
-
-func printHost(host *sshconfig.SSHHost) {
-	yellowBoldColor.Printf("    %s", strings.Join(host.Host, " "))
-	fmt.Printf(" -> %s\n\n", formatHost(host))
-}
 
 func list(c *cli.Context) error {
 	hosts, _ := sshconfig.ParseSSHConfig(path)
@@ -69,7 +34,28 @@ func list(c *cli.Context) error {
 }
 
 func add(c *cli.Context) error {
-	fmt.Println("add command")
+	if err := argumentsCheck(c, 2, 2); err != nil {
+		return err
+	}
+	newAlias := c.Args().Get(0)
+	hostStr := c.Args().Get(1)
+	hosts, _ := sshconfig.ParseSSHConfig(path)
+	hostMap := getHostsMap(hosts)
+	if _, ok := hostMap[newAlias]; ok {
+		printErrorFlag()
+		return cli.NewExitError("new ssh alias already exists", 1)
+	}
+	host := parseHost(newAlias, hostStr)
+	hosts = append(hosts, host)
+	if err := saveHosts(hosts); err != nil {
+		printErrorFlag()
+		return cli.NewExitError(err, 1)
+	}
+	printSuccessFlag()
+	whiteBoldColor.Printf("'%s' alias config added successfully\n\n", newAlias)
+	printHost(host)
+	return nil
+
 	return nil
 }
 
@@ -84,20 +70,12 @@ func delete(c *cli.Context) error {
 }
 
 func rename(c *cli.Context) error {
-	if err := argumentsCheck(c.Args(), 2, 2); err != nil {
-		cli.ShowSubcommandHelp(c)
-		fmt.Println()
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
+	if err := argumentsCheck(c, 2, 2); err != nil {
+		return err
 	}
 
 	hosts, _ := sshconfig.ParseSSHConfig(path)
-	hostMap := map[string]*sshconfig.SSHHost{}
-	for _, host := range hosts {
-		for _, alias := range host.Host {
-			hostMap[alias] = host
-		}
-	}
+	hostMap := getHostsMap(hosts)
 	oldName := c.Args().Get(0)
 	newName := c.Args().Get(1)
 	if _, ok := hostMap[oldName]; !ok {
@@ -126,11 +104,8 @@ func rename(c *cli.Context) error {
 }
 
 func backup(c *cli.Context) error {
-	if err := argumentsCheck(c.Args(), 1, 1); err != nil {
-		cli.ShowSubcommandHelp(c)
-		fmt.Println()
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
+	if err := argumentsCheck(c, 1, 1); err != nil {
+		return err
 	}
 
 	data, err := ioutil.ReadFile(path)
