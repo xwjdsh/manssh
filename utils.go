@@ -41,13 +41,19 @@ func saveHosts(hosts []*sshconfig.SSHHost) error {
 	return nil
 }
 
-func parseHost(alias, hostStr string) *sshconfig.SSHHost {
-	host := &sshconfig.SSHHost{
-		Host: []string{alias},
-		Port: 22,
+func parseHost(alias, hostStr string, originHost *sshconfig.SSHHost) *sshconfig.SSHHost {
+	var host *sshconfig.SSHHost
+	if originHost != nil {
+		host = originHost
+	} else {
+		host = &sshconfig.SSHHost{
+			Host: []string{alias},
+		}
 	}
+	host.Port = 22
 	u, _ := user.Current()
 	host.User = u.Name
+
 	hs := strings.Split(hostStr, "@")
 	connectUrl := hs[0]
 	if len(hs) > 1 {
@@ -94,12 +100,12 @@ func printHost(host *sshconfig.SSHHost) {
 }
 
 func argumentsCheck(c *cli.Context, min, max int) error {
-	arguments := c.Args()
+	argCount := c.NArg()
 	var err error
-	if min > 0 && len(arguments) < min {
+	if min > 0 && argCount < min {
 		err = errors.New("too few arguments")
 	}
-	if max > 0 && len(arguments) > max {
+	if max > 0 && argCount > max {
 		err = errors.New("too many arguments")
 	}
 	if err != nil {

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"strconv"
 
 	"github.com/mikkeloscar/sshconfig"
 	"github.com/urfave/cli"
@@ -45,7 +46,7 @@ func add(c *cli.Context) error {
 		printErrorFlag()
 		return cli.NewExitError(fmt.Sprintf("'%s' ssh alias already exists", newAlias), 1)
 	}
-	host := parseHost(newAlias, hostStr)
+	host := parseHost(newAlias, hostStr, nil)
 	hosts = append(hosts, host)
 	if err := saveHosts(hosts); err != nil {
 		return err
@@ -57,7 +58,52 @@ func add(c *cli.Context) error {
 }
 
 func update(c *cli.Context) error {
-	fmt.Println("update command")
+	if err := argumentsCheck(c, 1, 2); err != nil {
+		return err
+	}
+	alias := c.Args().Get(0)
+	hostStr := c.Args().Get(1)
+	hosts, _ := sshconfig.ParseSSHConfig(path)
+	hostMap := getHostsMap(hosts)
+	host, ok := hostMap[alias]
+	if !ok {
+		printErrorFlag()
+		return cli.NewExitError(fmt.Sprintf("ssh alias('%s') not found", alias), 1)
+	}
+	newUser, newHostname, newPort, newAlias := c.String("user"), c.String("host"), c.String("port"), c.String("alias")
+	fmt.Println(newUser, newHostname, newPort, newAlias)
+	if c.NArg() == 1 && newUser == "" && newHostname == "" && newPort == "" && newAlias == "" {
+		printErrorFlag()
+		return cli.NewExitError("too few arguments", 1)
+	}
+	if hostStr != "" {
+		parseHost(alias, hostStr, host)
+	}
+	if newUser != "" {
+		host.User = newUser
+	}
+	if newHostname != "" {
+		host.HostName = newHostname
+	}
+	if newPort != "" {
+		if p, err := strconv.Atoi(newPort); err != nil {
+			host.Port = p
+		}
+	}
+	if newAlias != "" {
+		for i, name := range host.Host {
+			if name == alias {
+				host.Host[i] = newAlias
+				break
+			}
+		}
+	}
+	if err := saveHosts(hosts); err != nil {
+		return err
+	}
+	printSuccessFlag()
+	whiteBoldColor.Printf("ssh alias('%s') updated successfully\n\n", alias)
+	printHost(host)
 	return nil
 }
 
@@ -98,39 +144,6 @@ func delete(c *cli.Context) error {
 	}
 	printSuccessFlag()
 	whiteBoldColor.Printf("deleted '%d' alias config\n", len(c.Args()))
-	return nil
-}
-
-func rename(c *cli.Context) error {
-	if err := argumentsCheck(c, 2, 2); err != nil {
-		return err
-	}
-
-	hosts, _ := sshconfig.ParseSSHConfig(path)
-	hostMap := getHostsMap(hosts)
-	oldName := c.Args().Get(0)
-	newName := c.Args().Get(1)
-	if _, ok := hostMap[oldName]; !ok {
-		printErrorFlag()
-		return cli.NewExitError("old ssh alias not found", 1)
-	}
-	if _, ok := hostMap[newName]; ok {
-		printErrorFlag()
-		return cli.NewExitError("new ssh alias already exists", 1)
-	}
-	host := hostMap[oldName]
-	for i, name := range host.Host {
-		if name == oldName {
-			host.Host[i] = newName
-			break
-		}
-	}
-	if err := saveHosts(hosts); err != nil {
-		return err
-	}
-	printSuccessFlag()
-	whiteBoldColor.Printf("Rename from '%s' to '%s'\n\n", oldName, newName)
-	printHost(host)
 	return nil
 }
 

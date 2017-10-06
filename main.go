@@ -26,9 +26,16 @@ func commands() []cli.Command {
 	return []cli.Command{
 		{Name: "add", Usage: "add a record to ssh config", Action: add},
 		{Name: "list", Usage: "list all existing ssh config record", Action: list},
-		{Name: "update", Usage: "update existing ssh config record", Action: update},
+		{
+			Name: "update", Usage: "update existing ssh config record", Action: update,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "user, u"},
+				cli.StringFlag{Name: "host, H"},
+				cli.StringFlag{Name: "port, p"},
+				cli.StringFlag{Name: "alias, a"},
+			},
+		},
 		{Name: "delete", Usage: "delete existing ssh config record", Action: delete},
-		{Name: "rename", Usage: "rename existing ssh config record", Action: rename},
 		{Name: "backup", Usage: "backup ssh config record", Action: backup},
 	}
 }
