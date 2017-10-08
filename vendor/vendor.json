@@ -1,0 +1,46 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "ce/QMYEvg0VQ3BW6C4EEBp2O45k=",
+			"path": "github.com/fatih/color",
+			"revision": "1535ebc2637cc042c938f07fa26c6356ab8f8504",
+			"revisionTime": "2017-09-05T12:23:28Z"
+		},
+		{
+			"checksumSHA1": "MrqRXuqj5suGXqcRUUwi+YA7PmE=",
+			"origin": "github.com/fatih/color/vendor/github.com/mattn/go-colorable",
+			"path": "github.com/mattn/go-colorable",
+			"revision": "1535ebc2637cc042c938f07fa26c6356ab8f8504",
+			"revisionTime": "2017-09-05T12:23:28Z"
+		},
+		{
+			"checksumSHA1": "a/chskqRYBBHS8lDTpB3FQqgHb8=",
+			"origin": "github.com/fatih/color/vendor/github.com/mattn/go-isatty",
+			"path": "github.com/mattn/go-isatty",
+			"revision": "1535ebc2637cc042c938f07fa26c6356ab8f8504",
+			"revisionTime": "2017-09-05T12:23:28Z"
+		},
+		{
+			"checksumSHA1": "LgLHVuJwf82snv4amu58ZtbCx2c=",
+			"path": "github.com/mikkeloscar/sshconfig",
+			"revision": "501286685510343458a6e698a18174f5242749f3",
+			"revisionTime": "2017-06-14T17:46:21Z"
+		},
+		{
+			"checksumSHA1": "lus29xeARKSKWgpA5UPegnYCSEI=",
+			"path": "github.com/urfave/cli",
+			"revision": "cf33a9befefdd6c6ea1a236ab6d546e797a62cbf",
+			"revisionTime": "2017-06-12T00:00:38Z"
+		},
+		{
+			"checksumSHA1": "oBjdFvDUZpioGsB6URqe16hDQUg=",
+			"origin": "github.com/fatih/color/vendor/golang.org/x/sys/unix",
+			"path": "golang.org/x/sys/unix",
+			"revision": "1535ebc2637cc042c938f07fa26c6356ab8f8504",
+			"revisionTime": "2017-09-05T12:23:28Z"
+		}
+	],
+	"rootPath": "github.com/xwjdsh/manssh"
+}
