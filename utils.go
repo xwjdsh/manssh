@@ -30,9 +30,15 @@ func saveHosts(hosts []*sshconfig.SSHHost) error {
 	var buffer bytes.Buffer
 	for _, host := range hosts {
 		buffer.WriteString(fmt.Sprintf("Host %s\n", strings.Join(host.Host, " ")))
-		buffer.WriteString(fmt.Sprintf("    user %s\n", host.User))
-		buffer.WriteString(fmt.Sprintf("    hostname %s\n", host.HostName))
-		buffer.WriteString(fmt.Sprintf("    port %d\n", host.Port))
+		buffer.WriteString(fmt.Sprintf("    User %s\n", host.User))
+		buffer.WriteString(fmt.Sprintf("    HostName %s\n", host.HostName))
+		buffer.WriteString(fmt.Sprintf("    Port %d\n", host.Port))
+		if host.IdentityFile != "" {
+			buffer.WriteString(fmt.Sprintf("    IdentityFile %s\n", host.IdentityFile))
+		}
+		if host.ProxyCommand != "" {
+			buffer.WriteString(fmt.Sprintf("    ProxyCommand %s\n", host.ProxyCommand))
+		}
 	}
 	if err := ioutil.WriteFile(path, buffer.Bytes(), 0644); err != nil {
 		printErrorFlag()

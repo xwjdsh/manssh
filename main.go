@@ -24,7 +24,12 @@ func flags() []cli.Flag {
 
 func commands() []cli.Command {
 	return []cli.Command{
-		{Name: "add", Usage: "add a new ssh alias record", Action: add},
+		{Name: "add", Usage: "add a new ssh alias record", Action: add,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "file, f"},
+				cli.StringFlag{Name: "proxy, p"},
+			},
+		},
 		{Name: "list", Usage: "list all ssh alias records", Action: list},
 		{
 			Name: "update", Usage: "update existing ssh alias record", Action: update,
@@ -33,6 +38,8 @@ func commands() []cli.Command {
 				cli.StringFlag{Name: "host, H"},
 				cli.StringFlag{Name: "port, p"},
 				cli.StringFlag{Name: "alias, a"},
+				cli.StringFlag{Name: "file, f"},
+				cli.StringFlag{Name: "proxy, P"},
 			},
 		},
 		{Name: "delete", Usage: "delete existing ssh alias record", Action: delete},

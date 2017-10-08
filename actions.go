@@ -47,6 +47,12 @@ func add(c *cli.Context) error {
 		return cli.NewExitError(fmt.Sprintf("ssh alias('%s') already exists.", newAlias), 1)
 	}
 	host := parseHost(newAlias, hostStr, nil)
+	if identityFile := c.String("file"); identityFile != "" {
+		host.IdentityFile = identityFile
+	}
+	if proxyCommand := c.String("proxy"); proxyCommand != "" {
+		host.ProxyCommand = proxyCommand
+	}
 	hosts = append(hosts, host)
 	if err := saveHosts(hosts); err != nil {
 		return err
@@ -71,7 +77,8 @@ func update(c *cli.Context) error {
 		return cli.NewExitError(fmt.Sprintf("ssh alias('%s') not found.", alias), 1)
 	}
 	newUser, newHostname, newPort, newAlias := c.String("user"), c.String("host"), c.String("port"), c.String("alias")
-	if c.NArg() == 1 && newUser == "" && newHostname == "" && newPort == "" && newAlias == "" {
+	newIdentityFile, newProxy := c.String("file"), c.String("proxy")
+	if c.NArg() == 1 && newUser == "" && newHostname == "" && newPort == "" && newAlias == "" && newIdentityFile == "" && newProxy == "" {
 		printErrorFlag()
 		return cli.NewExitError("too few arguments.", 1)
 	}
@@ -96,6 +103,12 @@ func update(c *cli.Context) error {
 				break
 			}
 		}
+	}
+	if newIdentityFile != "" {
+		host.IdentityFile = newIdentityFile
+	}
+	if newProxy != "" {
+		host.ProxyCommand = newProxy
 	}
 	if err := saveHosts(hosts); err != nil {
 		return err
