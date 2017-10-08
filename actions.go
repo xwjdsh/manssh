@@ -27,7 +27,7 @@ func list(c *cli.Context) error {
 		hosts = searchHosts
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("Display %d records.\n\n", len(hosts))
+	whiteBoldColor.Printf("display '%d' records.\n\n", len(hosts))
 	for _, host := range hosts {
 		printHost(host)
 	}
@@ -44,7 +44,7 @@ func add(c *cli.Context) error {
 	hostMap := getHostsMap(hosts)
 	if _, ok := hostMap[newAlias]; ok {
 		printErrorFlag()
-		return cli.NewExitError(fmt.Sprintf("'%s' ssh alias already exists", newAlias), 1)
+		return cli.NewExitError(fmt.Sprintf("ssh alias('%s') already exists.", newAlias), 1)
 	}
 	host := parseHost(newAlias, hostStr, nil)
 	hosts = append(hosts, host)
@@ -52,7 +52,7 @@ func add(c *cli.Context) error {
 		return err
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("'%s' alias config added successfully\n\n", newAlias)
+	whiteBoldColor.Printf("ssh alias('%s') added successfully.\n\n", newAlias)
 	printHost(host)
 	return nil
 }
@@ -68,13 +68,12 @@ func update(c *cli.Context) error {
 	host, ok := hostMap[alias]
 	if !ok {
 		printErrorFlag()
-		return cli.NewExitError(fmt.Sprintf("ssh alias('%s') not found", alias), 1)
+		return cli.NewExitError(fmt.Sprintf("ssh alias('%s') not found.", alias), 1)
 	}
 	newUser, newHostname, newPort, newAlias := c.String("user"), c.String("host"), c.String("port"), c.String("alias")
-	fmt.Println(newUser, newHostname, newPort, newAlias)
 	if c.NArg() == 1 && newUser == "" && newHostname == "" && newPort == "" && newAlias == "" {
 		printErrorFlag()
-		return cli.NewExitError("too few arguments", 1)
+		return cli.NewExitError("too few arguments.", 1)
 	}
 	if hostStr != "" {
 		parseHost(alias, hostStr, host)
@@ -102,7 +101,7 @@ func update(c *cli.Context) error {
 		return err
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("ssh alias('%s') updated successfully\n\n", alias)
+	whiteBoldColor.Printf("ssh alias('%s') updated successfully.\n\n", alias)
 	printHost(host)
 	return nil
 }
@@ -116,7 +115,7 @@ func delete(c *cli.Context) error {
 	for _, alias := range c.Args() {
 		if _, ok := hostMap[alias]; !ok {
 			printErrorFlag()
-			return cli.NewExitError(fmt.Sprintf("'%s' ssh alias not found", alias), 1)
+			return cli.NewExitError(fmt.Sprintf("ssh alias('%s') not found.", alias), 1)
 		}
 	}
 	newHosts := []*sshconfig.SSHHost{}
@@ -143,7 +142,7 @@ func delete(c *cli.Context) error {
 		return err
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("deleted '%d' alias config\n", len(c.Args()))
+	whiteBoldColor.Printf("deleted '%d' records.\n", len(c.Args()))
 	return nil
 }
 
@@ -164,6 +163,6 @@ func backup(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("backup ssh config to '%s' success", backupPath)
+	whiteBoldColor.Printf("backup ssh config to ('%s') successfully.", backupPath)
 	return nil
 }

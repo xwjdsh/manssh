@@ -103,10 +103,10 @@ func argumentsCheck(c *cli.Context, min, max int) error {
 	argCount := c.NArg()
 	var err error
 	if min > 0 && argCount < min {
-		err = errors.New("too few arguments")
+		err = errors.New("too few arguments.")
 	}
 	if max > 0 && argCount > max {
-		err = errors.New("too many arguments")
+		err = errors.New("too many arguments.")
 	}
 	if err != nil {
 		cli.ShowSubcommandHelp(c)
