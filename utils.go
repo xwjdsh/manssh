@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	version = "0.0.1"
-	usage   = "management ssh config easier"
+	version = "0.1"
+	usage   = "Manage your ssh alias configs easily"
 )
 
 var (
