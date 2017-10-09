@@ -14,9 +14,12 @@ import (
 	"github.com/urfave/cli"
 )
 
-const (
+var (
 	version = "master"
-	usage   = "Manage your ssh alias configs easily"
+)
+
+const (
+	usage = "Manage your ssh alias configs easily"
 )
 
 var (
