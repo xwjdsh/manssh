@@ -21,7 +21,6 @@ brew:
 
   install: |
     bin.install "manssh"
-    ...
 
 release:
   github:
