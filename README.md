@@ -21,6 +21,12 @@ Note: only `Host`, `HostName`, `User`, `Port`, `IdentityFile` and `ProxyCommand`
 go get github.com/xwjdsh/manssh
 ```
 
+#### Homebrew
+```shell
+brew tap xwjdsh/tap
+brew install xwjdsh/tap/manssh
+```
+
 #### Manual
 Download it from [releases](https://github.com/xwjdsh/manssh/releases), and extact it to your `PATH` environment.
 
