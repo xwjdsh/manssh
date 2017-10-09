@@ -9,7 +9,7 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Usage = useage
+	app.Usage = usage
 	app.Version = version
 	app.Flags = flags()
 	app.Commands = commands()

@@ -16,7 +16,7 @@ import (
 
 const (
 	version = "0.0.1"
-	useage  = "management ssh config easier"
+	usage   = "management ssh config easier"
 )
 
 var (
