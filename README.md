@@ -6,16 +6,16 @@
 
 manssh is a command line tool for manage your ssh alias config easily, inspire by [storm](https://github.com/emre/storm) project, power by Go.
 
+![](https://raw.githubusercontent.com/xwjdsh/manssh/master/screenshot/manssh.png)
+
 ## Install
 
 #### Go
-
 ```shell
 go get github.com/xwjdsh/manssh
 ```
 
 #### Manual
-
 Download it from [releases](https://github.com/xwjdsh/manssh/releases), and extact it to your `PATH` environment.
 
 ## Licence
