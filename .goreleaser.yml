@@ -13,8 +13,8 @@ brew:
     name: homebrew-tap
 
   commit_author:
-    name: goreleaserbot
-    email: goreleaser@carlosbecker.com
+    name: Wendell Sun
+    email: iwendellsun@gmail.com
 
   homepage: "https://github.com/xwjdsh/manssh"
   description: "Manage your ssh alias configs easily"
