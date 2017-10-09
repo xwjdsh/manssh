@@ -93,16 +93,23 @@ func formatHost(host *sshconfig.SSHHost) string {
 }
 
 func printSuccessFlag() {
-	successColor.Printf("%-10s", " success")
+	successColor.Printf("%-9s", " success")
 }
 
 func printErrorFlag() {
-	errorColor.Printf("%-8s", " error")
+	errorColor.Printf("%-6s", " error")
 }
 
 func printHost(host *sshconfig.SSHHost) {
-	yellowBoldColor.Printf("    %s", strings.Join(host.Host, " "))
-	fmt.Printf(" -> %s\n\n", formatHost(host))
+	yellowBoldColor.Printf("\t%s", strings.Join(host.Host, " "))
+	fmt.Printf(" -> %s\n", formatHost(host))
+	if host.IdentityFile != "" {
+		fmt.Printf("\t\tIdentityFile = %s\n", host.IdentityFile)
+	}
+	if host.ProxyCommand != "" {
+		fmt.Printf("\t\tProxyCommand = %s\n", host.ProxyCommand)
+	}
+	fmt.Println()
 }
 
 func argumentsCheck(c *cli.Context, min, max int) error {
