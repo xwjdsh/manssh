@@ -2,3 +2,13 @@ language: go
 go: 
  - 1.8
  - 1.9
+
+after_success:
+  - test "$TRAVIS_GO_VERSION" = "1.8" -a -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
+
+deployment:
+  tag:
+    tag: /v[0-9]+(\.[0-9]+)*(-.*)*/
+    owner: xwjdsh
+    commands:
+      - curl -sL https://git.io/goreleaser | bash
