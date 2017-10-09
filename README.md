@@ -24,7 +24,7 @@ go get github.com/xwjdsh/manssh
 Download it from [releases](https://github.com/xwjdsh/manssh/releases), and extact it to your `PATH` environment.
 
 ## Usage
-```shell
+```text
 % manssh
 NAME:
    manssh - Manage your ssh alias configs easily
