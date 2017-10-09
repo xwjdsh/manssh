@@ -1,5 +1,6 @@
 # manssh
 
+[![Release](http://github-release-version.herokuapp.com/github/xwjdsh/manssh/release.svg?style=flat)](https://github.com/xwjdsh/manssh/releases/latest)
 [![Build Status](https://travis-ci.org/xwjdsh/manssh.svg?branch=master)](https://travis-ci.org/xwjdsh/manssh)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xwjdsh/manssh)](https://goreportcard.com/report/github.com/xwjdsh/manssh)
 [![codebeat badge](https://codebeat.co/badges/38954713-7443-4149-915d-4543da2a5da5)](https://codebeat.co/projects/github-com-xwjdsh-manssh-master)
