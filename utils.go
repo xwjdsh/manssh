@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	version = "0.1"
+	version = "master"
 	usage   = "Manage your ssh alias configs easily"
 )
 

@@ -1,0 +1,39 @@
+# Build customization
+builds:
+  - binary: manssh
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+
+brew:
+  github:
+    owner: xwjdsh
+    name: homebrew-tap
+
+  commit_author:
+    name: goreleaserbot
+    email: goreleaser@carlosbecker.com
+
+  homepage: "https://github.com/xwjdsh/manssh"
+  description: "Manage your ssh alias configs easily"
+
+  install: |
+    bin.install "manssh"
+    ...
+
+release:
+  github:
+    owner: xwjdsh
+    name: manssh
+
+after_success:
+  - test "$TRAVIS_GO_VERSION" = "1.8" -a -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
+
+deployment:
+  tag:
+    tag: /v[0-9]+(\.[0-9]+)*(-.*)*/
+    owner: xwjdsh
+    commands:
+      - curl -sL https://git.io/goreleaser | bash
