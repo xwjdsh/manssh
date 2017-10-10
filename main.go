@@ -44,6 +44,12 @@ func commands() []cli.Command {
 		},
 		{Name: "delete", Usage: "delete existing ssh alias record", Action: delete, Aliases: []string{"d"}},
 		{Name: "backup", Usage: "backup ssh alias config records", Action: backup, Aliases: []string{"b"}},
-		{Name: "run", Usage: "run ssh alias only for osx", Action: run, Aliases: []string{"r"}},
+		{Name: "open", Usage: "run ssh alias only for osx", Action: open, Aliases: []string{"o"}},
+		{Name: "run", Usage: "run ssh alias only for osx", Action: run, Aliases: []string{"r"},
+			Flags: []cli.Flag{
+				cli.BoolFlag{Name: "password, p"},
+				cli.StringFlag{Name: "user, u"},
+			},
+		},
 	}
 }

@@ -2,14 +2,18 @@ package main
 
 import (
 	"bytes"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/user"
 	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/howeyc/gopass"
 	"github.com/mikkeloscar/sshconfig"
 	"github.com/urfave/cli"
 )
@@ -91,6 +95,23 @@ func getHostsMap(hosts []*sshconfig.SSHHost) map[string]*sshconfig.SSHHost {
 	return hostMap
 }
 
+func checkAlias(hosts []*sshconfig.SSHHost, expectExist bool, alias ...string) (*sshconfig.SSHHost, error) {
+	hostMap := getHostsMap(hosts)
+	for _, a := range alias {
+		_, ok := hostMap[a]
+		if !ok && expectExist {
+			return nil, fmt.Errorf("ssh alias('%s') not found.", a)
+		} else if ok && !expectExist {
+			return nil, fmt.Errorf("ssh alias('%s') already exists.", a)
+		}
+	}
+	var host *sshconfig.SSHHost
+	if len(alias) == 1 {
+		host = hostMap[alias[0]]
+	}
+	return host, nil
+}
+
 func formatHost(host *sshconfig.SSHHost) string {
 	return fmt.Sprintf("%s@%s:%d", host.User, host.HostName, host.Port)
 }
@@ -101,6 +122,13 @@ func printSuccessFlag() {
 
 func printErrorFlag() {
 	errorColor.Printf("%-6s", " error")
+}
+
+func printErrorWithHelp(c *cli.Context, err error) error {
+	cli.ShowSubcommandHelp(c)
+	fmt.Println()
+	printErrorFlag()
+	return cli.NewExitError(err, 1)
 }
 
 func printHost(host *sshconfig.SSHHost) {
@@ -124,11 +152,8 @@ func argumentsCheck(c *cli.Context, min, max int) error {
 	if max > 0 && argCount > max {
 		err = errors.New("too many arguments.")
 	}
+	return err
 	if err != nil {
-		cli.ShowSubcommandHelp(c)
-		fmt.Println()
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
 	}
 	return nil
 }
@@ -149,4 +174,39 @@ func contains(values []string, key string) bool {
 		}
 	}
 	return false
+}
+
+func readPrivateKey(path string) ([]byte, error) {
+	privateKey, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load identity: %v", err)
+	}
+
+	block, rest := pem.Decode(privateKey)
+	if len(rest) > 0 {
+		return nil, fmt.Errorf("extra data when decoding private key")
+	}
+	if !x509.IsEncryptedPEMBlock(block) {
+		return privateKey, nil
+	}
+
+	passphrase := []byte(os.Getenv("IDENTITY_PASSPHRASE"))
+	if len(passphrase) == 0 {
+		fmt.Print("Enter passphrase: ")
+		passphrase, err = gopass.GetPasswd()
+		if err != nil {
+			return nil, fmt.Errorf("couldn't read passphrase: %v", err)
+		}
+	}
+	der, err := x509.DecryptPEMBlock(block, passphrase)
+	if err != nil {
+		return nil, fmt.Errorf("decrypt failed: %v", err)
+	}
+
+	privateKey = pem.EncodeToMemory(&pem.Block{
+		Type:  block.Type,
+		Bytes: der,
+	})
+
+	return privateKey, nil
 }

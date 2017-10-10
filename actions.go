@@ -6,9 +6,12 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"time"
 
+	"github.com/howeyc/gopass"
 	"github.com/mikkeloscar/sshconfig"
 	"github.com/urfave/cli"
+	"golang.org/x/crypto/ssh"
 )
 
 var (
@@ -38,17 +41,15 @@ func list(c *cli.Context) error {
 }
 
 func add(c *cli.Context) error {
-	fmt.Println("add ", c.Args())
 	if err := argumentsCheck(c, 2, 2); err != nil {
-		return err
+		return printErrorWithHelp(c, err)
 	}
 	newAlias := c.Args().Get(0)
 	hostStr := c.Args().Get(1)
 	hosts, _ := sshconfig.ParseSSHConfig(path)
-	hostMap := getHostsMap(hosts)
-	if _, ok := hostMap[newAlias]; ok {
+	if _, err := checkAlias(hosts, false, newAlias); err != nil {
 		printErrorFlag()
-		return cli.NewExitError(fmt.Sprintf("ssh alias('%s') already exists.", newAlias), 1)
+		return cli.NewExitError(err, 1)
 	}
 	host := parseHost(newAlias, hostStr, nil)
 	if identityFile := c.String("file"); identityFile != "" {
@@ -69,16 +70,15 @@ func add(c *cli.Context) error {
 
 func update(c *cli.Context) error {
 	if err := argumentsCheck(c, 1, 2); err != nil {
-		return err
+		return printErrorWithHelp(c, err)
 	}
 	alias := c.Args().Get(0)
 	hostStr := c.Args().Get(1)
 	hosts, _ := sshconfig.ParseSSHConfig(path)
-	hostMap := getHostsMap(hosts)
-	host, ok := hostMap[alias]
-	if !ok {
+	host, err := checkAlias(hosts, true, alias)
+	if err != nil {
 		printErrorFlag()
-		return cli.NewExitError(fmt.Sprintf("ssh alias('%s') not found.", alias), 1)
+		return cli.NewExitError(err, 1)
 	}
 	newUser, newHostname, newPort, newAlias := c.String("user"), c.String("host"), c.String("port"), c.String("alias")
 	newIdentityFile, newProxy := c.String("file"), c.String("proxy")
@@ -125,15 +125,12 @@ func update(c *cli.Context) error {
 
 func delete(c *cli.Context) error {
 	if err := argumentsCheck(c, 1, -1); err != nil {
-		return err
+		return printErrorWithHelp(c, err)
 	}
 	hosts, _ := sshconfig.ParseSSHConfig(path)
-	hostMap := getHostsMap(hosts)
-	for _, alias := range c.Args() {
-		if _, ok := hostMap[alias]; !ok {
-			printErrorFlag()
-			return cli.NewExitError(fmt.Sprintf("ssh alias('%s') not found.", alias), 1)
-		}
+	if _, err := checkAlias(hosts, true, c.Args()...); err != nil {
+		printErrorFlag()
+		return cli.NewExitError(err, 1)
 	}
 	newHosts := []*sshconfig.SSHHost{}
 	for _, host := range hosts {
@@ -165,7 +162,7 @@ func delete(c *cli.Context) error {
 
 func backup(c *cli.Context) error {
 	if err := argumentsCheck(c, 1, 1); err != nil {
-		return err
+		return printErrorWithHelp(c, err)
 	}
 
 	data, err := ioutil.ReadFile(path)
@@ -184,28 +181,101 @@ func backup(c *cli.Context) error {
 	return nil
 }
 
-func run(c *cli.Context) error {
-	if err := argumentsCheck(c, 1, 2); err != nil {
-		return err
+func open(c *cli.Context) error {
+	if err := argumentsCheck(c, 1, 1); err != nil {
+		return printErrorWithHelp(c, err)
 	}
 
 	alias := c.Args().Get(0)
 	hosts, _ := sshconfig.ParseSSHConfig(path)
-	hostMap := getHostsMap(hosts)
-	host, ok := hostMap[alias]
-	if !ok {
+	if _, err := checkAlias(hosts, true, alias); err != nil {
 		printErrorFlag()
-		return cli.NewExitError(fmt.Sprintf("ssh alias('%s') not found.", alias), 1)
+		return cli.NewExitError(err, 1)
 	}
-	ssh := fmt.Sprintf("ssh %s@%s -p %d", host.User, host.HostName, host.Port)
+	ssh := fmt.Sprintf("ssh %s", alias)
 	sshCMD := exec.Command("/usr/bin/osascript", "-e", "tell application \"Terminal\" to activate", "-e", "tell application \"System Events\" to tell process \"Terminal\" to keystroke \"t\" using command down", "-e", fmt.Sprintf(CMD, ssh))
 	sshCMD.Env = os.Environ()
 	output, err := sshCMD.CombinedOutput()
-	fmt.Println("out: ", string(output))
 
 	if err != nil {
-		fmt.Println("run cmd err:", err)
+		printErrorFlag()
+		return cli.NewExitError(err, 1)
 	}
-	return err
 
+	printSuccessFlag()
+	whiteBoldColor.Println("out: ", string(output))
+	return nil
+}
+
+func run(c *cli.Context) error {
+	if err := argumentsCheck(c, 2, 2); err != nil {
+		return printErrorWithHelp(c, err)
+	}
+	alias := c.Args().Get(0)
+	command := c.Args().Get(1)
+	hosts, _ := sshconfig.ParseSSHConfig(path)
+	host, err := checkAlias(hosts, true, alias)
+	if err != nil {
+		printErrorFlag()
+		return cli.NewExitError(err, 1)
+	}
+	user := host.User
+	if u := c.String("user"); u != "" {
+		user = u
+	}
+
+	auth := []ssh.AuthMethod{}
+	if c.Bool("password") {
+		fmt.Print("Enter password: ")
+		password, err := gopass.GetPasswd()
+		if err != nil {
+			printErrorFlag()
+			return cli.NewExitError(err, 1)
+		}
+		auth = append(auth, ssh.Password(string(password)))
+	} else {
+		keyPath := fmt.Sprintf("%s/.ssh/id_rsa", os.Getenv("HOME"))
+		if host.IdentityFile != "" {
+			keyPath = host.IdentityFile
+		}
+		keyBytes, err := readPrivateKey(keyPath)
+		if err != nil {
+			printErrorFlag()
+			return cli.NewExitError(err, 1)
+		}
+		key, err := ssh.ParsePrivateKey(keyBytes)
+		if err != nil {
+			printErrorFlag()
+			return cli.NewExitError(err, 1)
+		}
+		auth = append(auth, ssh.PublicKeys(key))
+	}
+	clientConfig := &ssh.ClientConfig{
+		User:            user,
+		Auth:            auth,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         10 * time.Second,
+	}
+	addr := fmt.Sprintf("%s:%d", host.HostName, host.Port)
+	client, err := ssh.Dial("tcp", addr, clientConfig)
+	if err != nil {
+		printErrorFlag()
+		return cli.NewExitError(err, 1)
+	}
+
+	// create session
+	session, err := client.NewSession()
+	if err != nil {
+		printErrorFlag()
+		return cli.NewExitError(err, 1)
+	}
+	defer session.Close()
+
+	session.Stdout = os.Stdout
+	session.Stderr = os.Stderr
+	if err := session.Run(command); err != nil {
+		printErrorFlag()
+		return cli.NewExitError(err, 1)
+	}
+	return nil
 }
