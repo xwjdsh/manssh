@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
+	"os/exec"
 	"strconv"
 
 	"github.com/mikkeloscar/sshconfig"
@@ -11,6 +13,7 @@ import (
 
 var (
 	path string
+	CMD  = "tell application \"Terminal\" to do script \"%s\" in selected tab of the front window"
 )
 
 func list(c *cli.Context) error {
@@ -35,6 +38,7 @@ func list(c *cli.Context) error {
 }
 
 func add(c *cli.Context) error {
+	fmt.Println("add ", c.Args())
 	if err := argumentsCheck(c, 2, 2); err != nil {
 		return err
 	}
@@ -178,4 +182,30 @@ func backup(c *cli.Context) error {
 	printSuccessFlag()
 	whiteBoldColor.Printf("backup ssh config to ('%s') successfully.", backupPath)
 	return nil
+}
+
+func run(c *cli.Context) error {
+	if err := argumentsCheck(c, 1, 2); err != nil {
+		return err
+	}
+
+	alias := c.Args().Get(0)
+	hosts, _ := sshconfig.ParseSSHConfig(path)
+	hostMap := getHostsMap(hosts)
+	host, ok := hostMap[alias]
+	if !ok {
+		printErrorFlag()
+		return cli.NewExitError(fmt.Sprintf("ssh alias('%s') not found.", alias), 1)
+	}
+	ssh := fmt.Sprintf("ssh %s@%s -p %d", host.User, host.HostName, host.Port)
+	sshCMD := exec.Command("/usr/bin/osascript", "-e", "tell application \"Terminal\" to activate", "-e", "tell application \"System Events\" to tell process \"Terminal\" to keystroke \"t\" using command down", "-e", fmt.Sprintf(CMD, ssh))
+	sshCMD.Env = os.Environ()
+	output, err := sshCMD.CombinedOutput()
+	fmt.Println("out: ", string(output))
+
+	if err != nil {
+		fmt.Println("run cmd err:", err)
+	}
+	return err
+
 }
