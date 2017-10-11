@@ -33,27 +33,6 @@ var (
 	errorColor      = color.New(color.BgRed, color.FgWhite)
 )
 
-// parsePath resolve path and get the real file path, if config file is a symbol link
-func parsePath(path string) string {
-	fileInfo, err := os.Lstat(path)
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	if fileInfo.Mode()&os.ModeSymlink != 0 {
-		originFile, err := os.Readlink(path)
-
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		return originFile
-	}
-	return path
-}
-
 func saveHosts(hosts []*sshconfig.SSHHost) error {
 	var buffer bytes.Buffer
 	for _, host := range hosts {
