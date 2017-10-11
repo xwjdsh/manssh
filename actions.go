@@ -20,7 +20,7 @@ var (
 )
 
 func list(c *cli.Context) error {
-	hosts, _ := sshconfig.ParseSSHConfig(parsePath(path))
+	hosts, _ := sshconfig.ParseSSHConfig(path)
 	if len(c.Args()) > 0 {
 		searchHosts := []*sshconfig.SSHHost{}
 		for _, host := range hosts {
@@ -46,7 +46,7 @@ func add(c *cli.Context) error {
 	}
 	newAlias := c.Args().Get(0)
 	hostStr := c.Args().Get(1)
-	hosts, _ := sshconfig.ParseSSHConfig(parsePath(path))
+	hosts, _ := sshconfig.ParseSSHConfig(path)
 	if _, err := checkAlias(hosts, false, newAlias); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
@@ -74,7 +74,7 @@ func update(c *cli.Context) error {
 	}
 	alias := c.Args().Get(0)
 	hostStr := c.Args().Get(1)
-	hosts, _ := sshconfig.ParseSSHConfig(parsePath(path))
+	hosts, _ := sshconfig.ParseSSHConfig(path)
 	host, err := checkAlias(hosts, true, alias)
 	if err != nil {
 		printErrorFlag()
@@ -127,7 +127,7 @@ func delete(c *cli.Context) error {
 	if err := argumentsCheck(c, 1, -1); err != nil {
 		return printErrorWithHelp(c, err)
 	}
-	hosts, _ := sshconfig.ParseSSHConfig(parsePath(path))
+	hosts, _ := sshconfig.ParseSSHConfig(path)
 	if _, err := checkAlias(hosts, true, c.Args()...); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
@@ -187,7 +187,7 @@ func open(c *cli.Context) error {
 	}
 
 	alias := c.Args().Get(0)
-	hosts, _ := sshconfig.ParseSSHConfig(parsePath(path))
+	hosts, _ := sshconfig.ParseSSHConfig(path)
 	if _, err := checkAlias(hosts, true, alias); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
@@ -213,7 +213,7 @@ func run(c *cli.Context) error {
 	}
 	alias := c.Args().Get(0)
 	command := c.Args().Get(1)
-	hosts, _ := sshconfig.ParseSSHConfig(parsePath(path))
+	hosts, _ := sshconfig.ParseSSHConfig(path)
 	host, err := checkAlias(hosts, true, alias)
 	if err != nil {
 		printErrorFlag()
