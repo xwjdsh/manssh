@@ -1,20 +1,13 @@
 package main
 
 import (
-	"bytes"
-	"crypto/x509"
-	"encoding/pem"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"os/user"
 	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/howeyc/gopass"
-	"github.com/mikkeloscar/sshconfig"
 	"github.com/urfave/cli"
 )
 
@@ -27,93 +20,40 @@ const (
 )
 
 var (
-	whiteBoldColor  = color.New(color.FgWhite, color.Bold)
-	yellowBoldColor = color.New(color.FgYellow, color.Bold)
-	successColor    = color.New(color.BgGreen, color.FgWhite)
-	errorColor      = color.New(color.BgRed, color.FgWhite)
+	whiteBoldColor   = color.New(color.FgWhite, color.Bold)
+	yellowBoldColor  = color.New(color.FgYellow, color.Bold)
+	magentaBoldColor = color.New(color.FgMagenta, color.Bold)
+	successColor     = color.New(color.BgGreen, color.FgWhite)
+	errorColor       = color.New(color.BgRed, color.FgWhite)
 )
 
-func saveHosts(hosts []*sshconfig.SSHHost) error {
-	var buffer bytes.Buffer
-	for _, host := range hosts {
-		buffer.WriteString(fmt.Sprintf("Host %s\n", strings.Join(host.Host, " ")))
-		buffer.WriteString(fmt.Sprintf("    User %s\n", host.User))
-		buffer.WriteString(fmt.Sprintf("    HostName %s\n", host.HostName))
-		buffer.WriteString(fmt.Sprintf("    Port %d\n", host.Port))
-		if host.IdentityFile != "" {
-			buffer.WriteString(fmt.Sprintf("    IdentityFile %s\n", host.IdentityFile))
-		}
-		if host.ProxyCommand != "" {
-			buffer.WriteString(fmt.Sprintf("    ProxyCommand %s\n", host.ProxyCommand))
-		}
-	}
-	if err := ioutil.WriteFile(path, buffer.Bytes(), 0644); err != nil {
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
-	}
-	return nil
+func formatConnect(user, hostname, port string) string {
+	return fmt.Sprintf("%s@%s:%s", user, hostname, port)
 }
 
-func parseHost(alias, hostStr string, originHost *sshconfig.SSHHost) *sshconfig.SSHHost {
-	var host *sshconfig.SSHHost
-	if originHost != nil {
-		host = originHost
-	} else {
-		host = &sshconfig.SSHHost{
-			Host: []string{alias},
-		}
-	}
-	host.Port = 22
-	u, _ := user.Current()
-	host.User = u.Name
+// format is [user@]host[:port]
+func parseConnct(connect string) (string, string, string) {
+	var u, hostname, port string
+	port = "22"
+	currentUser, _ := user.Current()
+	u = currentUser.Name
 
-	hs := strings.Split(hostStr, "@")
-	connectUrl := hs[0]
+	hs := strings.Split(connect, "@")
+	hostname = hs[0]
 	if len(hs) > 1 {
 		if hs[0] != "" {
-			host.User = hs[0]
+			u = hs[0]
 		}
-		connectUrl = hs[1]
+		hostname = hs[1]
 	}
-	hss := strings.Split(connectUrl, ":")
-	host.HostName = hss[0]
+	hss := strings.Split(hostname, ":")
+	hostname = hss[0]
 	if len(hss) > 1 {
-		if port, err := strconv.Atoi(hss[1]); err == nil {
-			host.Port = port
+		if _, err := strconv.Atoi(hss[1]); err == nil {
+			port = hss[1]
 		}
 	}
-	return host
-}
-
-func getHostsMap(hosts []*sshconfig.SSHHost) map[string]*sshconfig.SSHHost {
-	hostMap := map[string]*sshconfig.SSHHost{}
-	for _, host := range hosts {
-		for _, alias := range host.Host {
-			hostMap[alias] = host
-		}
-	}
-	return hostMap
-}
-
-func checkAlias(hosts []*sshconfig.SSHHost, expectExist bool, alias ...string) (*sshconfig.SSHHost, error) {
-	hostMap := getHostsMap(hosts)
-	for _, a := range alias {
-		_, ok := hostMap[a]
-		if !ok && expectExist {
-			return nil, fmt.Errorf("ssh alias('%s') not found.", a)
-		} else if ok && !expectExist {
-			return nil, fmt.Errorf("ssh alias('%s') already exists.", a)
-		}
-	}
-	var host *sshconfig.SSHHost
-	if len(alias) == 1 {
-		host = hostMap[alias[0]]
-	}
-	return host, nil
-}
-
-func formatHost(host *sshconfig.SSHHost) string {
-	return fmt.Sprintf("%s@%s:%d", host.User, host.HostName, host.Port)
+	return u, hostname, port
 }
 
 func printSuccessFlag() {
@@ -131,14 +71,19 @@ func printErrorWithHelp(c *cli.Context, err error) error {
 	return cli.NewExitError(err, 1)
 }
 
-func printHost(host *sshconfig.SSHHost) {
-	yellowBoldColor.Printf("\t%s", strings.Join(host.Host, " "))
-	fmt.Printf(" -> %s\n", formatHost(host))
-	if host.IdentityFile != "" {
-		fmt.Printf("\t\tIdentityFile = %s\n", host.IdentityFile)
+func printHost(host *hostConfig) {
+	yellowBoldColor.Printf("\t%s", host.aliases)
+	fmt.Printf(" -> %s\n", host.connect)
+	for k, v := range host.config {
+		fmt.Printf("\t\t%s = %s\n", k, v)
 	}
-	if host.ProxyCommand != "" {
-		fmt.Printf("\t\tProxyCommand = %s\n", host.ProxyCommand)
+	fmt.Println()
+}
+
+func printGlobalConfig(config map[string]string) {
+	magentaBoldColor.Printf("\t (*) Global Configs\n")
+	for k, v := range config {
+		fmt.Printf("\t\t%s = %s\n", k, v)
 	}
 	fmt.Println()
 }
@@ -174,39 +119,4 @@ func contains(values []string, key string) bool {
 		}
 	}
 	return false
-}
-
-func readPrivateKey(path string) ([]byte, error) {
-	privateKey, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load identity: %v", err)
-	}
-
-	block, rest := pem.Decode(privateKey)
-	if len(rest) > 0 {
-		return nil, fmt.Errorf("extra data when decoding private key")
-	}
-	if !x509.IsEncryptedPEMBlock(block) {
-		return privateKey, nil
-	}
-
-	passphrase := []byte(os.Getenv("IDENTITY_PASSPHRASE"))
-	if len(passphrase) == 0 {
-		fmt.Print("Enter passphrase: ")
-		passphrase, err = gopass.GetPasswd()
-		if err != nil {
-			return nil, fmt.Errorf("couldn't read passphrase: %v", err)
-		}
-	}
-	der, err := x509.DecryptPEMBlock(block, passphrase)
-	if err != nil {
-		return nil, fmt.Errorf("decrypt failed: %v", err)
-	}
-
-	privateKey = pem.EncodeToMemory(&pem.Block{
-		Type:  block.Type,
-		Bytes: der,
-	})
-
-	return privateKey, nil
 }
