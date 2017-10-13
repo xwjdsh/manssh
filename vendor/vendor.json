@@ -15,6 +15,12 @@
 			"revisionTime": "2017-01-09T16:22:49Z"
 		},
 		{
+			"checksumSHA1": "6im1Neuol61wdrvQPzf2Q1vTBr4=",
+			"path": "github.com/kevinburke/ssh_config",
+			"revision": "4ec3da02a795384225d1b5c762049e8f6a3722f6",
+			"revisionTime": "2017-05-26T18:07:48Z"
+		},
+		{
 			"checksumSHA1": "MrqRXuqj5suGXqcRUUwi+YA7PmE=",
 			"origin": "github.com/fatih/color/vendor/github.com/mattn/go-colorable",
 			"path": "github.com/mattn/go-colorable",
@@ -33,6 +39,12 @@
 			"path": "github.com/mikkeloscar/sshconfig",
 			"revision": "501286685510343458a6e698a18174f5242749f3",
 			"revisionTime": "2017-06-14T17:46:21Z"
+		},
+		{
+			"checksumSHA1": "F1IYMLBLAZaTOWnmXsgaxTGvrWI=",
+			"path": "github.com/pelletier/go-buffruneio",
+			"revision": "c37440a7cf42ac63b919c752ca73a85067e05992",
+			"revisionTime": "2017-02-27T22:03:11Z"
 		},
 		{
 			"checksumSHA1": "lus29xeARKSKWgpA5UPegnYCSEI=",
@@ -61,6 +73,12 @@
 		{
 			"checksumSHA1": "nnD48uEKLyuT9T+DZHrSbMkMRCE=",
 			"path": "golang.org/x/crypto/ssh",
+			"revision": "9ba3862cf6a5452ae579de98f9364dd2e544844c",
+			"revisionTime": "2017-01-27T19:13:05Z"
+		},
+		{
+			"checksumSHA1": "ujKeyWHFOYmXm5IgAxfyFCGefsY=",
+			"path": "golang.org/x/crypto/ssh/agent",
 			"revision": "9ba3862cf6a5452ae579de98f9364dd2e544844c",
 			"revisionTime": "2017-01-27T19:13:05Z"
 		},
