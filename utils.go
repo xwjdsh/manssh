@@ -61,7 +61,7 @@ func printSuccessFlag() {
 }
 
 func printErrorFlag() {
-	errorColor.Printf("%-6s", " error")
+	errorColor.Printf("%-7s", " error")
 }
 
 func printErrorWithHelp(c *cli.Context, err error) error {

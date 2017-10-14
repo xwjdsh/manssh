@@ -83,6 +83,7 @@ func listHost(keywords ...string) ([]*hostConfig, map[string]string) {
 		for _, node := range host.Nodes {
 			switch t := node.(type) {
 			case *ssh_config.KV:
+				t.Key = strings.ToLower(t.Key)
 				values = append(values, t.Value)
 				if _, ok := connectMap[t.Key]; ok {
 					connectMap[t.Key] = t.Value
@@ -140,7 +141,8 @@ func addHost(host *hostConfig) error {
 	deleteKeys := []string{}
 	for k, v := range host.config {
 		if !checkKeyRepeat[strings.ToLower(k)] {
-			nodes = append(nodes, &ssh_config.KV{Key: k, Value: v})
+			node := &ssh_config.KV{Key: k, Value: v}
+			nodes = append(nodes, node.SetLeadingSpace(4))
 		} else {
 			deleteKeys = append(deleteKeys, k)
 		}
@@ -185,16 +187,36 @@ func updateHost(h *hostConfig) error {
 			updateKV[strings.ToLower(k)] = v
 		}
 	}
+	h.config = map[string]string{}
+	connectMap := map[string]string{USER: "", HOSTNAME: "", PORT: ""}
 	for _, node := range updateHost.Nodes {
 		switch t := node.(type) {
 		case *ssh_config.KV:
 			if value, ok := updateKV[t.Key]; ok {
+				t.SetLeadingSpace(4)
 				t.Value = value
+				delete(updateKV, t.Key)
+			}
+			if _, ok := connectMap[t.Key]; ok {
+				connectMap[t.Key] = t.Value
+			} else {
+				h.config[t.Key] = t.Value
 			}
 		case *ssh_config.Include:
 			// TODO handle include node
 		}
 	}
+	// append new node
+	for k, v := range updateKV {
+		kv := &ssh_config.KV{Key: k, Value: v}
+		updateHost.Nodes = append(updateHost.Nodes, kv.SetLeadingSpace(4))
+		if _, ok := connectMap[k]; ok {
+			connectMap[k] = v
+		} else {
+			h.config[k] = v
+		}
+	}
+	h.connect = formatConnect(connectMap[USER], connectMap[HOSTNAME], connectMap[PORT])
 	if err := ioutil.WriteFile(path, []byte(cfg.String()), 0644); err != nil {
 		return err
 	}

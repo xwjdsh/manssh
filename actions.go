@@ -37,6 +37,9 @@ func addAction(c *cli.Context) error {
 		aliases: alias,
 		connect: connect,
 	}
+	if kvConfig := c.Generic("config"); kvConfig != nil {
+		host.config = kvConfig.(*kvFlag).m
+	}
 	if err := addHost(host); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
@@ -57,6 +60,10 @@ func updateAction(c *cli.Context) error {
 		aliases: alias,
 		connect: connect,
 	}
+	if kvConfig := c.Generic("config"); kvConfig != nil {
+		host.config = kvConfig.(*kvFlag).m
+	}
+
 	if err := updateHost(host); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
