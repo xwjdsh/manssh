@@ -166,13 +166,21 @@ func addHost(host *hostConfig) error {
 	return nil
 }
 
-func updateHost(h *hostConfig) error {
+func updateHost(h *hostConfig, newAlias string) error {
 	cfg, aliasMap := parseConfig()
 	if err := checkAlias(aliasMap, true, h.aliases); err != nil {
 		return err
 	}
 
 	updateHost := aliasMap[h.aliases]
+	if newAlias != "" {
+		for _, pattern := range updateHost.Patterns {
+			if pattern.String() == h.aliases {
+				pattern.SetStr(newAlias)
+				h.aliases = newAlias
+			}
+		}
+	}
 
 	updateKV := map[string]string{}
 	if h.connect != "" {

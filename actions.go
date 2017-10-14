@@ -64,7 +64,7 @@ func updateAction(c *cli.Context) error {
 		host.config = kvConfig.(*kvFlag).m
 	}
 
-	if err := updateHost(host); err != nil {
+	if err := updateHost(host, c.String("rename")); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
 	}
@@ -105,7 +105,7 @@ func backupAction(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("backup ssh config to ('%s') successfully.", backupPath)
+	whiteBoldColor.Printf("backup ssh config to (%s) successfully.", backupPath)
 	return nil
 }
 
