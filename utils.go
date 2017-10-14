@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"os/user"
 	"strconv"
 	"strings"
@@ -119,4 +120,12 @@ func contains(values []string, key string) bool {
 		}
 	}
 	return false
+}
+
+func getHomeDir() string {
+	user, err := user.Current()
+	if nil == err && user.HomeDir != "" {
+		return user.HomeDir
+	}
+	return os.Getenv("HOME")
 }

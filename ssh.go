@@ -9,14 +9,13 @@ import (
 	"os"
 
 	"github.com/howeyc/gopass"
+	homedir "github.com/mitchellh/go-homedir"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-var keyPath = fmt.Sprintf("%s/.ssh/id_rsa", os.Getenv("HOME"))
-
-func getAuthMethod(passwordAuth bool) (ssh.AuthMethod, error) {
+func getAuthMethod(passwordAuth bool, keyPath string) (ssh.AuthMethod, error) {
 	var auth ssh.AuthMethod
 	var err error
 	if passwordAuth {
@@ -82,8 +81,13 @@ func readPrivateKey(file string) ([]byte, error) {
 	return privateKey, nil
 }
 
-func createSession(passwordAuth bool, user, hostname, port string) (*ssh.Session, error) {
-	auth, err := getAuthMethod(passwordAuth)
+func createSession(passwordAuth bool, user, hostname, port, identityfile string) (*ssh.Session, error) {
+	if identityfile == "" {
+		identityfile = fmt.Sprintf("%s/.ssh/id_rsa", getHomeDir())
+	} else {
+		identityfile, _ = homedir.Expand(identityfile)
+	}
+	auth, err := getAuthMethod(passwordAuth, identityfile)
 	if err != nil {
 		return nil, err
 	}

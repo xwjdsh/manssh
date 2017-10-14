@@ -20,7 +20,7 @@ func main() {
 
 func flags() []cli.Flag {
 	return []cli.Flag{
-		cli.StringFlag{Name: "file, f", Value: fmt.Sprintf("%s/.ssh/config", os.Getenv("HOME")), Destination: &path},
+		cli.StringFlag{Name: "file, f", Value: fmt.Sprintf("%s/.ssh/config", getHomeDir()), Destination: &path},
 	}
 }
 
