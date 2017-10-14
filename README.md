@@ -6,13 +6,14 @@
 [![codebeat badge](https://codebeat.co/badges/38954713-7443-4149-915d-4543da2a5da5)](https://codebeat.co/projects/github-com-xwjdsh-manssh-master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-
-
 manssh is a command line tool for managing your ssh alias config easily, inspire by [storm](https://github.com/emre/storm) project, powered by Go.
 
-Note: only `Host`, `HostName`, `User`, `Port`, `IdentityFile` and `ProxyCommand` is implemented at this point, **other configs and comments will loss**.
+![](https://raw.githubusercontent.com/xwjdsh/manssh/master/screenshot/manssh.gif)
 
-![](https://raw.githubusercontent.com/xwjdsh/manssh/master/screenshot/manssh.png)
+## Feature
+
+* Managing ssh connection alias quickly. (add, update, list, delete, backup)
+* Run command on remote server quickly. 
 
 ## Install
 
@@ -40,21 +41,22 @@ USAGE:
    manssh [global options] command [command options] [arguments...]
 
 VERSION:
-   0.1.0
+   master
 
 COMMANDS:
      add, a     add a new ssh alias record
-     list, l    list all ssh alias records
+     list, l    list or search ssh alias records
      update, u  update existing ssh alias record
      delete, d  delete existing ssh alias record
      backup, b  backup ssh alias config records
+     open, o    open new terminal and connecting server only for osx
+     run, r     run command on remote server
      help, h    Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --config value, -c value  (default: "/Users/wendell/.ssh/config")
-   --help, -h                show help
-   --version, -v             print the version
-
+   --file value, -f value  (default: "/Users/wendell/.ssh/config")
+   --help, -h              show help
+   --version, -v           print the version
 ```
 
 ## Licence
