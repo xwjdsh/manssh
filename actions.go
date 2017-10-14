@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -150,7 +149,6 @@ func runAction(c *cli.Context) error {
 	} else if tmpUser != "" {
 		user = tmpUser
 	}
-	log.Println(user, hostname, port)
 	session, err := createSession(c.Bool("password"), user, hostname, port, identityfile)
 	if err != nil {
 		printErrorFlag()
