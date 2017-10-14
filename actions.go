@@ -131,11 +131,12 @@ func openAction(c *cli.Context) error {
 }
 
 func runAction(c *cli.Context) error {
-	if err := argumentsCheck(c, 2, 2); err != nil {
+	if err := argumentsCheck(c, 2, -1); err != nil {
 		return printErrorWithHelp(c, err)
 	}
-	alias := c.Args().Get(0)
-	command := c.Args().Get(1)
+	args := c.Args()
+	alias := args.Get(0)
+	command := strings.Join(append(args[:0], args[1:]...), " ")
 
 	userAlias := strings.Split(alias, "@")
 	tmpUser, tmpAlias := "", alias
