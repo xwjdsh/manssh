@@ -295,6 +295,11 @@ func (p Pattern) String() string {
 	return p.str
 }
 
+func (p *Pattern) SetStr(str string) *Pattern {
+	p.str = str
+	return p
+}
+
 // Copied from regexp.go with * and ? removed.
 var specialBytes = []byte(`\.+()|[]{}^$`)
 

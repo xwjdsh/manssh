@@ -75,6 +75,7 @@ func commands() []cli.Command {
 			Aliases: []string{"u"},
 			Flags: []cli.Flag{
 				cli.GenericFlag{Name: "config, c", Value: &kvFlag{}},
+				cli.StringFlag{Name: "rename, r"},
 			},
 		},
 		{
