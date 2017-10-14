@@ -191,7 +191,7 @@ func updateHost(h *hostConfig, newAlias string) error {
 		user, hostname, port := parseConnct(h.connect)
 		updateKV[USER] = user
 		updateKV[HOSTNAME] = hostname
-		updateKV[port] = port
+		updateKV[PORT] = port
 		h.connect = formatConnect(user, hostname, port)
 	}
 	if h.config != nil {
