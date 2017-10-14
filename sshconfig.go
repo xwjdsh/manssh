@@ -16,9 +16,10 @@ type hostConfig struct {
 }
 
 const (
-	USER     = "user"
-	HOSTNAME = "hostname"
-	PORT     = "port"
+	USER          = "user"
+	HOSTNAME      = "hostname"
+	PORT          = "port"
+	IDENTITY_FILE = "identityfile"
 )
 
 func checkAlias(aliasMap map[string]*ssh_config.Host, expectExist bool, aliases ...string) error {
@@ -48,22 +49,23 @@ func parseConfig() (*ssh_config.Config, map[string]*ssh_config.Host) {
 	return cfg, aliasMap
 }
 
-func getHostConnect(alias string) (bool, string, string, string) {
+func getHostConnect(alias string) (bool, string, string, string, string) {
 	_, aliasMap := parseConfig()
 	host := aliasMap[alias]
 	if host == nil {
-		return false, "", "", ""
+		return false, "", "", "", ""
 	}
-	connectMap := map[string]string{USER: "", HOSTNAME: "", PORT: ""}
+	connectMap := map[string]string{USER: "", HOSTNAME: "", PORT: "", IDENTITY_FILE: ""}
 	for _, node := range host.Nodes {
 		switch t := node.(type) {
 		case *ssh_config.KV:
-			if _, ok := connectMap[t.Key]; ok {
-				connectMap[t.Key] = t.Value
+			lk := strings.ToLower(t.Key)
+			if _, ok := connectMap[lk]; ok {
+				connectMap[lk] = t.Value
 			}
 		}
 	}
-	return true, connectMap[USER], connectMap[HOSTNAME], connectMap[PORT]
+	return true, connectMap[USER], connectMap[HOSTNAME], connectMap[PORT], connectMap[IDENTITY_FILE]
 }
 
 func listHost(keywords ...string) ([]*hostConfig, map[string]string) {
@@ -140,9 +142,11 @@ func addHost(host *hostConfig) error {
 	checkKeyRepeat := map[string]bool{USER: true, HOSTNAME: true, PORT: true}
 	deleteKeys := []string{}
 	for k, v := range host.config {
-		if !checkKeyRepeat[strings.ToLower(k)] {
-			node := &ssh_config.KV{Key: k, Value: v}
+		lk := strings.ToLower(k)
+		if !checkKeyRepeat[lk] {
+			node := &ssh_config.KV{Key: lk, Value: v}
 			nodes = append(nodes, node.SetLeadingSpace(4))
+			checkKeyRepeat[lk] = true
 		} else {
 			deleteKeys = append(deleteKeys, k)
 		}

@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/urfave/cli"
 )
@@ -136,11 +138,20 @@ func runAction(c *cli.Context) error {
 	alias := c.Args().Get(0)
 	command := c.Args().Get(1)
 
-	exists, user, hostname, port := getHostConnect(alias)
+	userAlias := strings.Split(alias, "@")
+	tmpUser, tmpAlias := "", alias
+	if len(userAlias) == 2 {
+		tmpUser, tmpAlias = userAlias[0], userAlias[1]
+	}
+
+	exists, user, hostname, port, identityfile := getHostConnect(tmpAlias)
 	if !exists {
 		user, hostname, port = parseConnct(alias)
+	} else if tmpUser != "" {
+		user = tmpUser
 	}
-	session, err := createSession(c.Bool("password"), user, hostname, port)
+	log.Println(user, hostname, port)
+	session, err := createSession(c.Bool("password"), user, hostname, port, identityfile)
 	if err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
