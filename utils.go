@@ -99,9 +99,6 @@ func argumentsCheck(c *cli.Context, min, max int) error {
 		err = errors.New("too many arguments.")
 	}
 	return err
-	if err != nil {
-	}
-	return nil
 }
 
 func query(values, keys []string) bool {
