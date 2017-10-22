@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/urfave/cli"
 )
@@ -22,33 +20,6 @@ func flags() []cli.Flag {
 	return []cli.Flag{
 		cli.StringFlag{Name: "file, f", Value: fmt.Sprintf("%s/.ssh/config", getHomeDir()), Destination: &path},
 	}
-}
-
-type kvFlag struct {
-	m map[string]string
-}
-
-func (kv *kvFlag) Set(value string) error {
-	if value == "" {
-		return nil
-	}
-	if kv.m == nil {
-		kv.m = map[string]string{}
-	}
-	parts := strings.Split(value, "=")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return fmt.Errorf("flag param(%s) parse error", value)
-	}
-	kv.m[parts[0]] = parts[1]
-	return nil
-}
-
-func (kv *kvFlag) String() string {
-	if kv == nil {
-		return ""
-	}
-	jsonBytes, _ := json.Marshal(kv)
-	return string(jsonBytes)
 }
 
 func commands() []cli.Command {

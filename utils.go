@@ -89,8 +89,7 @@ func printGlobalConfig(config map[string]string) {
 	fmt.Println()
 }
 
-func argumentsCheck(c *cli.Context, min, max int) error {
-	argCount := c.NArg()
+func argumentsCheck(argCount, min, max int) error {
 	var err error
 	if min > 0 && argCount < min {
 		err = errors.New("too few arguments.")
