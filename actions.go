@@ -29,7 +29,7 @@ func listAction(c *cli.Context) error {
 }
 
 func addAction(c *cli.Context) error {
-	if err := argumentsCheck(c, 2, 2); err != nil {
+	if err := argumentsCheck(c.NArg(), 2, 2); err != nil {
 		return printErrorWithHelp(c, err)
 	}
 	alias := c.Args().Get(0)
@@ -52,7 +52,7 @@ func addAction(c *cli.Context) error {
 }
 
 func updateAction(c *cli.Context) error {
-	if err := argumentsCheck(c, 1, 2); err != nil {
+	if err := argumentsCheck(c.NArg(), 1, 2); err != nil {
 		return printErrorWithHelp(c, err)
 	}
 	alias := c.Args().Get(0)
@@ -77,7 +77,7 @@ func updateAction(c *cli.Context) error {
 }
 
 func deleteAction(c *cli.Context) error {
-	if err := argumentsCheck(c, 1, -1); err != nil {
+	if err := argumentsCheck(c.NArg(), 1, -1); err != nil {
 		return printErrorWithHelp(c, err)
 	}
 	if err := deleteHost(c.Args()...); err != nil {
@@ -90,7 +90,7 @@ func deleteAction(c *cli.Context) error {
 }
 
 func backupAction(c *cli.Context) error {
-	if err := argumentsCheck(c, 1, 1); err != nil {
+	if err := argumentsCheck(c.NArg(), 1, 1); err != nil {
 		return printErrorWithHelp(c, err)
 	}
 
@@ -111,7 +111,7 @@ func backupAction(c *cli.Context) error {
 }
 
 func openAction(c *cli.Context) error {
-	if err := argumentsCheck(c, 1, 1); err != nil {
+	if err := argumentsCheck(c.NArg(), 1, 1); err != nil {
 		return printErrorWithHelp(c, err)
 	}
 	addr := c.Args().Get(0)
@@ -131,7 +131,7 @@ func openAction(c *cli.Context) error {
 }
 
 func runAction(c *cli.Context) error {
-	if err := argumentsCheck(c, 2, -1); err != nil {
+	if err := argumentsCheck(c.NArg(), 2, -1); err != nil {
 		return printErrorWithHelp(c, err)
 	}
 	args := c.Args()
