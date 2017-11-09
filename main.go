@@ -26,7 +26,7 @@ func commands() []cli.Command {
 	return []cli.Command{
 		{
 			Name:    "add",
-			Usage:   "add a new ssh alias record",
+			Usage:   "adds a new ssh alias record",
 			Action:  addAction,
 			Aliases: []string{"a"},
 			Flags: []cli.Flag{
@@ -60,21 +60,6 @@ func commands() []cli.Command {
 			Usage:   "backup ssh alias config records",
 			Action:  backupAction,
 			Aliases: []string{"b"},
-		},
-		{
-			Name:    "open",
-			Usage:   "open new terminal and connecting server only for osx",
-			Action:  openAction,
-			Aliases: []string{"o"},
-		},
-		{
-			Name:    "run",
-			Usage:   "run command on remote server",
-			Action:  runAction,
-			Aliases: []string{"r"},
-			Flags: []cli.Flag{
-				cli.BoolFlag{Name: "password, p"},
-			},
 		},
 	}
 }

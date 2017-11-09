@@ -16,10 +16,9 @@ type hostConfig struct {
 }
 
 const (
-	USER          = "user"
-	HOSTNAME      = "hostname"
-	PORT          = "port"
-	IDENTITY_FILE = "identityfile"
+	USER     = "user"
+	HOSTNAME = "hostname"
+	PORT     = "port"
 )
 
 func checkAlias(aliasMap map[string]*ssh_config.Host, expectExist bool, aliases ...string) error {
@@ -40,32 +39,10 @@ func parseConfig() (*ssh_config.Config, map[string]*ssh_config.Host) {
 	aliasMap := map[string]*ssh_config.Host{}
 	for _, host := range cfg.Hosts {
 		for _, pattern := range host.Patterns {
-			// exclude global config alias
-			if alias := pattern.String(); alias != "*" {
-				aliasMap[alias] = host
-			}
+			aliasMap[pattern.String()] = host
 		}
 	}
 	return cfg, aliasMap
-}
-
-func getHostConnect(alias string) (bool, string, string, string, string) {
-	_, aliasMap := parseConfig()
-	host := aliasMap[alias]
-	if host == nil {
-		return false, "", "", "", ""
-	}
-	connectMap := map[string]string{USER: "", HOSTNAME: "", PORT: "", IDENTITY_FILE: ""}
-	for _, node := range host.Nodes {
-		switch t := node.(type) {
-		case *ssh_config.KV:
-			lk := strings.ToLower(t.Key)
-			if _, ok := connectMap[lk]; ok {
-				connectMap[lk] = t.Value
-			}
-		}
-	}
-	return true, connectMap[USER], connectMap[HOSTNAME], connectMap[PORT], connectMap[IDENTITY_FILE]
 }
 
 func listHost(keywords ...string) ([]*hostConfig, map[string]string) {
