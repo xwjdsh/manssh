@@ -1,18 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
-	"os"
-	"os/exec"
-	"strings"
 
 	"github.com/urfave/cli"
 )
 
 var (
 	path string
-	CMD  = "tell application \"Terminal\" to do script \"%s\" in selected tab of the front window"
 )
 
 func listAction(c *cli.Context) error {
@@ -46,7 +41,7 @@ func addAction(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("alias(%s) added successfully.\n\n", alias)
+	whiteBoldColor.Printf("alias[%s] added successfully.\n\n", alias)
 	printHost(host)
 	return nil
 }
@@ -71,7 +66,7 @@ func updateAction(c *cli.Context) error {
 	}
 
 	printSuccessFlag()
-	whiteBoldColor.Printf("alias(%s) updated successfully.\n\n", alias)
+	whiteBoldColor.Printf("alias[%s] updated successfully.\n\n", alias)
 	printHost(host)
 	return nil
 }
@@ -106,59 +101,6 @@ func backupAction(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("backup ssh config to (%s) successfully.", backupPath)
-	return nil
-}
-
-func openAction(c *cli.Context) error {
-	if err := argumentsCheck(c.NArg(), 1, 1); err != nil {
-		return printErrorWithHelp(c, err)
-	}
-	addr := c.Args().Get(0)
-	ssh := fmt.Sprintf("ssh %s", addr)
-	sshCMD := exec.Command("/usr/bin/osascript", "-e", "tell application \"Terminal\" to activate", "-e", "tell application \"System Events\" to tell process \"Terminal\" to keystroke \"t\" using command down", "-e", fmt.Sprintf(CMD, ssh))
-	sshCMD.Env = os.Environ()
-	output, err := sshCMD.CombinedOutput()
-
-	if err != nil {
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
-	}
-
-	printSuccessFlag()
-	whiteBoldColor.Println("out: ", string(output))
-	return nil
-}
-
-func runAction(c *cli.Context) error {
-	if err := argumentsCheck(c.NArg(), 2, -1); err != nil {
-		return printErrorWithHelp(c, err)
-	}
-	args := c.Args()
-	alias := args.Get(0)
-	command := strings.Join(append(args[:0], args[1:]...), " ")
-
-	userAlias := strings.Split(alias, "@")
-	tmpUser, tmpAlias := "", alias
-	if len(userAlias) == 2 {
-		tmpUser, tmpAlias = userAlias[0], userAlias[1]
-	}
-
-	exists, user, hostname, port, identityfile := getHostConnect(tmpAlias)
-	if !exists {
-		user, hostname, port = parseConnct(alias)
-	} else if tmpUser != "" {
-		user = tmpUser
-	}
-	session, err := createSession(c.Bool("password"), user, hostname, port, identityfile)
-	if err != nil {
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
-	}
-	if err := executeCommand(session, command); err != nil {
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
-	}
-
+	whiteBoldColor.Printf("backup ssh config to [%s] successfully.", backupPath)
 	return nil
 }
