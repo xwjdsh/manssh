@@ -295,6 +295,12 @@ func (p Pattern) String() string {
 	return p.str
 }
 
+// SetStr set pattern str
+func (p *Pattern) SetStr(str string) *Pattern {
+	p.str = str
+	return p
+}
+
 // Copied from regexp.go with * and ? removed.
 var specialBytes = []byte(`\.+()|[]{}^$`)
 
@@ -437,6 +443,12 @@ type KV struct {
 // Pos returns k's Position.
 func (k *KV) Pos() Position {
 	return k.position
+}
+
+// SetLeadingSpace set leading space value
+func (k *KV) SetLeadingSpace(leadingSpace uint16) *KV {
+	k.leadingSpace = leadingSpace
+	return k
 }
 
 // String prints k as it was parsed in the config file. There may be slight
