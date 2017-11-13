@@ -295,11 +295,6 @@ func (p Pattern) String() string {
 	return p.str
 }
 
-func (p *Pattern) SetStr(str string) *Pattern {
-	p.str = str
-	return p
-}
-
 // Copied from regexp.go with * and ? removed.
 var specialBytes = []byte(`\.+()|[]{}^$`)
 
@@ -437,11 +432,6 @@ type KV struct {
 	hasEquals    bool
 	leadingSpace uint16 // Space before the key. TODO handle spaces vs tabs.
 	position     Position
-}
-
-func (k *KV) SetLeadingSpace(ls uint16) *KV {
-	k.leadingSpace = ls
-	return k
 }
 
 // Pos returns k's Position.
