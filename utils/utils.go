@@ -11,17 +11,22 @@ import (
 	"github.com/kevinburke/ssh_config"
 )
 
+// HostConfig struct include alias, connect string and other config
 type HostConfig struct {
+	// Aliases may be multi, eg "a1 a2"
 	Aliases string
+	// Connect format is user@host:port
 	Connect string
-	Config  map[string]string
+	// Config is other configs
+	Config map[string]string
 }
 
+// FormatConnect return connect string
 func FormatConnect(user, hostname, port string) string {
 	return fmt.Sprintf("%s@%s:%s", user, hostname, port)
 }
 
-// format is [user@]host[:port]
+// ParseConnct parse connect string, format is [user@]host[:port]
 func ParseConnct(connect string) (string, string, string) {
 	var u, hostname, port string
 	port = "22"
@@ -46,6 +51,7 @@ func ParseConnct(connect string) (string, string, string) {
 	return u, hostname, port
 }
 
+// ArgumentsCheck check arguments count correctness
 func ArgumentsCheck(argCount, min, max int) error {
 	var err error
 	if min > 0 && argCount < min {
@@ -57,6 +63,7 @@ func ArgumentsCheck(argCount, min, max int) error {
 	return err
 }
 
+// Query values contains keys
 func Query(values, keys []string) bool {
 	for _, key := range keys {
 		if !contains(values, key) {
@@ -75,6 +82,7 @@ func contains(values []string, key string) bool {
 	return false
 }
 
+// GetHomeDir return user's home directory
 func GetHomeDir() string {
 	user, err := user.Current()
 	if nil == err && user.HomeDir != "" {
@@ -83,6 +91,7 @@ func GetHomeDir() string {
 	return os.Getenv("HOME")
 }
 
+// CheckAlias check alias expect exist
 func CheckAlias(aliasMap map[string]*ssh_config.Host, expectExist bool, aliases ...string) error {
 	for _, alias := range aliases {
 		ok := aliasMap[alias] != nil
