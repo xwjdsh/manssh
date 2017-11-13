@@ -145,10 +145,7 @@ func Add(path string, host *utils.HostConfig) error {
 		Nodes:    nodes,
 	}
 	cfg.Hosts = append(cfg.Hosts, newHost)
-	if err := ioutil.WriteFile(path, []byte(cfg.String()), 0644); err != nil {
-		return err
-	}
-	return nil
+	return ioutil.WriteFile(path, []byte(cfg.String()), 0644)
 }
 
 // Update existing record
@@ -217,10 +214,7 @@ func Update(path string, h *utils.HostConfig, newAlias string) error {
 		}
 	}
 	h.Connect = utils.FormatConnect(connectMap[User], connectMap[Hostname], connectMap[Port])
-	if err := ioutil.WriteFile(path, []byte(cfg.String()), 0644); err != nil {
-		return err
-	}
-	return nil
+	return ioutil.WriteFile(path, []byte(cfg.String()), 0644)
 }
 
 // Delete existing alias record
@@ -247,8 +241,5 @@ func Delete(path string, aliases ...string) error {
 		}
 	}
 	cfg.Hosts = newHosts
-	if err := ioutil.WriteFile(path, []byte(cfg.String()), 0644); err != nil {
-		return err
-	}
-	return nil
+	return ioutil.WriteFile(path, []byte(cfg.String()), 0644)
 }
