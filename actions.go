@@ -16,7 +16,7 @@ var (
 func list(c *cli.Context) error {
 	hosts := sshconfig.List(path, c.Args()...)
 	printSuccessFlag()
-	whiteBoldColor.Printf("Listing %d records.\n\n", len(hosts))
+	printMessage("Listing %d records.\n\n", len(hosts))
 	printHosts(hosts)
 	return nil
 }
@@ -43,7 +43,7 @@ func add(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("alias[%s] added successfully.\n\n", host.Aliases)
+	printMessage("alias[%s] added successfully.\n\n", host.Aliases)
 	printHost(host)
 	return nil
 }
@@ -66,7 +66,7 @@ func update(c *cli.Context) error {
 	}
 
 	printSuccessFlag()
-	whiteBoldColor.Printf("alias[%s] updated successfully.\n\n", host.Aliases)
+	printMessage("alias[%s] updated successfully.\n\n", host.Aliases)
 	printHost(host)
 	return nil
 }
@@ -80,7 +80,7 @@ func delete(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("deleted %d records.\n", len(c.Args()))
+	printMessage("deleted %d records.\n", len(c.Args()))
 	return nil
 }
 
@@ -101,6 +101,6 @@ func backup(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("backup ssh config to [%s] successfully.", backupPath)
+	printMessage("backup ssh config to [%s] successfully.", backupPath)
 	return nil
 }
