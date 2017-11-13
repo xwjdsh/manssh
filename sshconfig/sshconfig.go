@@ -10,9 +10,12 @@ import (
 )
 
 const (
-	User     = "user"
+	// User is ssh config key
+	User = "user"
+	// Hostname is ssh config key
 	Hostname = "hostname"
-	Port     = "port"
+	// Port is ssh config key
+	Port = "port"
 )
 
 // ParseConfig parse configs from ssh config file, return config object and alias map
