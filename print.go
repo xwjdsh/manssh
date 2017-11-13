@@ -9,20 +9,21 @@ import (
 )
 
 var (
-	whiteBoldColor   = color.New(color.FgWhite, color.Bold)
-	yellowBoldColor  = color.New(color.FgYellow, color.Bold)
-	magentaBoldColor = color.New(color.FgMagenta, color.Bold)
+	messageStyle   = color.New(color.FgWhite, color.Bold)
+	aliasStyle     = color.New(color.FgYellow, color.Bold)
+	globalStyle    = color.New(color.FgMagenta, color.Bold)
+	globalKeyStyle = color.New(color.FgCyan, color.Bold)
 
-	successColor = color.New(color.BgGreen, color.FgWhite)
-	errorColor   = color.New(color.BgRed, color.FgWhite)
+	successStyle = color.New(color.BgGreen, color.FgWhite)
+	errorStyle   = color.New(color.BgRed, color.FgWhite)
 )
 
 func printSuccessFlag() {
-	successColor.Printf("%-9s", " success")
+	successStyle.Printf("%-9s", " success")
 }
 
 func printErrorFlag() {
-	errorColor.Printf("%-7s", " error")
+	errorStyle.Printf("%-7s", " error")
 }
 
 func printErrorWithHelp(c *cli.Context, err error) error {
@@ -45,15 +46,25 @@ func printHosts(hosts []*utils.HostConfig) {
 	}
 }
 
+func printMessage(format string, a ...interface{}) {
+	messageStyle.Printf(format, a)
+}
+
 func printHost(host *utils.HostConfig) {
-	if host.Aliases == "*" {
-		magentaBoldColor.Printf("\t (*) Global Configs\n")
+	isGlobal := host.Aliases == "*"
+	if isGlobal {
+		globalStyle.Printf("\t(*) Global Configs\n")
 	} else {
-		yellowBoldColor.Printf("\t%s", host.Aliases)
+		aliasStyle.Printf("\t%s", host.Aliases)
 		fmt.Printf(" -> %s\n", host.Connect)
 	}
 	for k, v := range host.Config {
-		fmt.Printf("\t\t%s = %s\n", k, v)
+		if isGlobal {
+			globalKeyStyle.Printf("\t\t%s ", k)
+			fmt.Printf("= %s\n", v)
+		} else {
+			fmt.Printf("\t\t%s = %s\n", k, v)
+		}
 	}
 	fmt.Println()
 }
