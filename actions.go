@@ -1,81 +1,81 @@
 package main
 
 import (
+	"errors"
 	"io/ioutil"
 
 	"github.com/urfave/cli"
+	"github.com/xwjdsh/manssh/sshconfig"
+	"github.com/xwjdsh/manssh/utils"
 )
 
 var (
 	path string
 )
 
-func listAction(c *cli.Context) error {
-	hosts, globalConfig := listHost(c.Args()...)
+func list(c *cli.Context) error {
+	hosts := sshconfig.List(path, c.Args()...)
 	printSuccessFlag()
-	whiteBoldColor.Printf("display %d records.\n\n", len(hosts))
-	for _, host := range hosts {
-		printHost(host)
-	}
-	if len(globalConfig) > 0 {
-		printGlobalConfig(globalConfig)
-	}
+	whiteBoldColor.Printf("Listing %d records.\n\n", len(hosts))
+	printHosts(hosts)
 	return nil
 }
 
-func addAction(c *cli.Context) error {
-	if err := argumentsCheck(c.NArg(), 2, 2); err != nil {
+func add(c *cli.Context) error {
+	// Check arguments count
+	if err := utils.ArgumentsCheck(c.NArg(), 1, 2); err != nil {
 		return printErrorWithHelp(c, err)
 	}
-	alias := c.Args().Get(0)
-	connect := c.Args().Get(1)
-	host := &hostConfig{
-		aliases: alias,
-		connect: connect,
+	host := &utils.HostConfig{
+		Aliases: c.Args().Get(0),
+		Connect: c.Args().Get(1),
 	}
 	if kvConfig := c.Generic("config"); kvConfig != nil {
-		host.config = kvConfig.(*kvFlag).m
+		host.Config = kvConfig.(*kvFlag).m
 	}
-	if err := addHost(host); err != nil {
+
+	if host.Config == nil && host.Connect == "" {
+		return printErrorWithHelp(c, errors.New("param error"))
+	}
+
+	if err := sshconfig.Add(path, host); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
 	}
 	printSuccessFlag()
-	whiteBoldColor.Printf("alias[%s] added successfully.\n\n", alias)
+	whiteBoldColor.Printf("alias[%s] added successfully.\n\n", host.Aliases)
 	printHost(host)
 	return nil
 }
 
-func updateAction(c *cli.Context) error {
-	if err := argumentsCheck(c.NArg(), 1, 2); err != nil {
+func update(c *cli.Context) error {
+	if err := utils.ArgumentsCheck(c.NArg(), 1, 2); err != nil {
 		return printErrorWithHelp(c, err)
 	}
-	alias := c.Args().Get(0)
-	connect := c.Args().Get(1)
-	host := &hostConfig{
-		aliases: alias,
-		connect: connect,
+	host := &utils.HostConfig{
+		Aliases: c.Args().Get(0),
+		Connect: c.Args().Get(1),
 	}
 	if kvConfig := c.Generic("config"); kvConfig != nil {
-		host.config = kvConfig.(*kvFlag).m
+		host.Config = kvConfig.(*kvFlag).m
 	}
 
-	if err := updateHost(host, c.String("rename")); err != nil {
+	if err := sshconfig.Update(path, host, c.String("rename")); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
 	}
 
 	printSuccessFlag()
-	whiteBoldColor.Printf("alias[%s] updated successfully.\n\n", alias)
+	whiteBoldColor.Printf("alias[%s] updated successfully.\n\n", host.Aliases)
 	printHost(host)
 	return nil
 }
 
-func deleteAction(c *cli.Context) error {
-	if err := argumentsCheck(c.NArg(), 1, -1); err != nil {
+func delete(c *cli.Context) error {
+	if err := utils.ArgumentsCheck(c.NArg(), 1, -1); err != nil {
 		return printErrorWithHelp(c, err)
 	}
-	if err := deleteHost(c.Args()...); err != nil {
+	if err := sshconfig.Delete(path, c.Args()...); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
 	}
@@ -84,8 +84,8 @@ func deleteAction(c *cli.Context) error {
 	return nil
 }
 
-func backupAction(c *cli.Context) error {
-	if err := argumentsCheck(c.NArg(), 1, 1); err != nil {
+func backup(c *cli.Context) error {
+	if err := utils.ArgumentsCheck(c.NArg(), 1, 1); err != nil {
 		return printErrorWithHelp(c, err)
 	}
 
