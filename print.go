@@ -38,6 +38,7 @@ func printHosts(hosts []*utils.HostConfig) {
 	for _, host := range hosts {
 		if host.Aliases == "*" {
 			global = host
+			continue
 		}
 		printHost(host)
 	}
