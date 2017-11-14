@@ -15,13 +15,13 @@ func commands() []cli.Command {
 		},
 		{
 			Name:    "list",
-			Usage:   "Listing or query SSH alias records",
+			Usage:   "List or query SSH alias records",
 			Action:  list,
 			Aliases: []string{"l"},
 		},
 		{
 			Name:    "update",
-			Usage:   "Update SSH record by alias name",
+			Usage:   "Update SSH record by specified alias name",
 			Action:  update,
 			Aliases: []string{"u"},
 			Flags: []cli.Flag{
@@ -31,7 +31,7 @@ func commands() []cli.Command {
 		},
 		{
 			Name:    "delete",
-			Usage:   "Delete SSH records by alias name",
+			Usage:   "Delete SSH records by specified alias names",
 			Action:  delete,
 			Aliases: []string{"d"},
 		},
