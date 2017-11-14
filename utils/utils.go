@@ -15,7 +15,7 @@ import (
 type HostConfig struct {
 	// Aliases may be multi, eg "a1 a2"
 	Aliases string
-	// Connect format is user@host:port
+	// Connect string format is user@host:port
 	Connect string
 	// Config is other configs
 	Config map[string]string
@@ -91,7 +91,7 @@ func GetHomeDir() string {
 	return os.Getenv("HOME")
 }
 
-// CheckAlias check alias expect exist
+// CheckAlias check alias exist or not
 func CheckAlias(aliasMap map[string]*ssh_config.Host, expectExist bool, aliases ...string) error {
 	for _, alias := range aliases {
 		ok := aliasMap[alias] != nil

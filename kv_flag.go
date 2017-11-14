@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// https://github.com/urfave/cli/issues/588
 type kvFlag struct {
 	m map[string]string
 }

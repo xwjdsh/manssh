@@ -10,11 +10,11 @@ import (
 )
 
 const (
-	// User is ssh config key
+	// User is a ssh config key
 	User = "user"
-	// Hostname is ssh config key
+	// Hostname is a ssh config key
 	Hostname = "hostname"
-	// Port is ssh config key
+	// Port is a ssh config key
 	Port = "port"
 )
 
@@ -31,7 +31,7 @@ func ParseConfig(path string) (*ssh_config.Config, map[string]*ssh_config.Host) 
 	return cfg, aliasMap
 }
 
-// List ssh alias by optional keyword
+// List ssh alias, filter by optional keyword
 func List(path string, keywords ...string) []*utils.HostConfig {
 	cfg, _ := ParseConfig(path)
 	hosts := []*utils.HostConfig{}

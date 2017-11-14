@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"io/ioutil"
+	"strings"
 
 	"github.com/urfave/cli"
 	"github.com/xwjdsh/manssh/sshconfig"
@@ -80,7 +81,7 @@ func delete(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 	printSuccessFlag()
-	printMessage("deleted %d records.\n", len(c.Args()))
+	printMessage("alias[%s] deleted successfully.\n", strings.Join(c.Args(), ","))
 	return nil
 }
 
