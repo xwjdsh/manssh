@@ -30,8 +30,7 @@ func FormatConnect(user, hostname, port string) string {
 func ParseConnct(connect string) (string, string, string) {
 	var u, hostname, port string
 	port = "22"
-	currentUser, _ := user.Current()
-	u = currentUser.Name
+	u = GetHomeDir()
 
 	hs := strings.Split(connect, "@")
 	hostname = hs[0]
