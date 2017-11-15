@@ -1,4 +1,4 @@
-package sshconfig
+package manssh
 
 import (
 	"io/ioutil"
@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/kevinburke/ssh_config"
-	"github.com/xwjdsh/manssh/utils"
 )
 
 const (
@@ -32,17 +31,17 @@ func ParseConfig(path string) (*ssh_config.Config, map[string]*ssh_config.Host) 
 }
 
 // List ssh alias, filter by optional keyword
-func List(path string, keywords ...string) []*utils.HostConfig {
+func List(path string, keywords ...string) []*HostConfig {
 	cfg, _ := ParseConfig(path)
-	hosts := []*utils.HostConfig{}
+	hosts := []*HostConfig{}
 
-	// Convert to utils.HostConfig
+	// Convert to HostConfig
 	for _, host := range cfg.Hosts {
 		aliases := []string{}
 		for _, pattern := range host.Patterns {
 			aliases = append(aliases, pattern.String())
 		}
-		h := &utils.HostConfig{
+		h := &HostConfig{
 			Aliases: strings.Join(aliases, " "),
 			Config:  map[string]string{},
 		}
@@ -72,11 +71,11 @@ func List(path string, keywords ...string) []*utils.HostConfig {
 		if isGlobal && len(h.Config) == 0 {
 			continue
 		}
-		if len(keywords) > 0 && !utils.Query(values, keywords) {
+		if len(keywords) > 0 && !Query(values, keywords) {
 			continue
 		}
 		if !isGlobal {
-			h.Connect = utils.FormatConnect(connectMap[User], connectMap[Hostname], connectMap[Port])
+			h.Connect = FormatConnect(connectMap[User], connectMap[Hostname], connectMap[Port])
 		}
 		hosts = append(hosts, h)
 	}
@@ -89,12 +88,12 @@ func List(path string, keywords ...string) []*utils.HostConfig {
 }
 
 // Add ssh host config to ssh config file
-func Add(path string, host *utils.HostConfig) error {
+func Add(path string, host *HostConfig) error {
 	cfg, aliasMap := ParseConfig(path)
 	isGlobal := host.Aliases == "*"
 	// Alias should not exist. except "*" because it always existing
 	if !isGlobal {
-		if err := utils.CheckAlias(aliasMap, false, host.Aliases); err != nil {
+		if err := CheckAlias(aliasMap, false, host.Aliases); err != nil {
 			return err
 		}
 	}
@@ -106,8 +105,8 @@ func Add(path string, host *utils.HostConfig) error {
 
 	// Parse connect string
 	if host.Connect != "" {
-		user, hostname, port := utils.ParseConnct(host.Connect)
-		host.Connect = utils.FormatConnect(user, hostname, port)
+		user, hostname, port := ParseConnct(host.Connect)
+		host.Connect = FormatConnect(user, hostname, port)
 
 		userKV := &ssh_config.KV{Key: User, Value: user}
 		nodes = append(nodes, userKV.SetLeadingSpace(4))
@@ -152,9 +151,9 @@ func Add(path string, host *utils.HostConfig) error {
 }
 
 // Update existing record
-func Update(path string, h *utils.HostConfig, newAlias string) error {
+func Update(path string, h *HostConfig, newAlias string) error {
 	cfg, aliasMap := ParseConfig(path)
-	if err := utils.CheckAlias(aliasMap, true, h.Aliases); err != nil {
+	if err := CheckAlias(aliasMap, true, h.Aliases); err != nil {
 		return err
 	}
 
@@ -171,7 +170,7 @@ func Update(path string, h *utils.HostConfig, newAlias string) error {
 
 	updateKV := map[string]string{}
 	if h.Connect != "" {
-		user, hostname, port := utils.ParseConnct(h.Connect)
+		user, hostname, port := ParseConnct(h.Connect)
 		updateKV[User] = user
 		updateKV[Hostname] = hostname
 		updateKV[Port] = port
@@ -216,14 +215,14 @@ func Update(path string, h *utils.HostConfig, newAlias string) error {
 			h.Config[k] = v
 		}
 	}
-	h.Connect = utils.FormatConnect(connectMap[User], connectMap[Hostname], connectMap[Port])
+	h.Connect = FormatConnect(connectMap[User], connectMap[Hostname], connectMap[Port])
 	return ioutil.WriteFile(path, []byte(cfg.String()), 0644)
 }
 
 // Delete existing alias record
 func Delete(path string, aliases ...string) error {
 	cfg, aliasMap := ParseConfig(path)
-	if err := utils.CheckAlias(aliasMap, true, aliases...); err != nil {
+	if err := CheckAlias(aliasMap, true, aliases...); err != nil {
 		return err
 	}
 	deleteAliasMap := map[string]bool{}
