@@ -92,7 +92,7 @@ func Add(path string, host *HostConfig) error {
 	cfg, aliasMap := ParseConfig(path)
 	isGlobal := host.Aliases == "*"
 	// Alias should not exist. except "*" because it always existing
-	if !isGlobal {
+	if !isGlobal || (isGlobal && len(aliasMap["*"].Nodes) > 0) {
 		if err := CheckAlias(aliasMap, false, host.Aliases); err != nil {
 			return err
 		}
@@ -142,11 +142,16 @@ func Add(path string, host *HostConfig) error {
 	if err != nil {
 		return nil
 	}
+	patterns := []*ssh_config.Pattern{pattern}
 	newHost := &ssh_config.Host{
-		Patterns: []*ssh_config.Pattern{pattern},
+		Patterns: patterns,
 		Nodes:    nodes,
 	}
-	cfg.Hosts = append(cfg.Hosts, newHost)
+	if !isGlobal {
+		cfg.Hosts = append(cfg.Hosts, newHost)
+	} else {
+		*aliasMap["*"] = *newHost
+	}
 	return ioutil.WriteFile(path, []byte(cfg.String()), 0644)
 }
 
