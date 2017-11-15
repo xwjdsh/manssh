@@ -49,7 +49,7 @@ func printHosts(hosts []*manssh.HostConfig) {
 }
 
 func printMessage(format string, a ...interface{}) {
-	messageStyle.Printf(format, a)
+	messageStyle.Printf(format, a...)
 }
 
 func printHost(host *manssh.HostConfig) {
