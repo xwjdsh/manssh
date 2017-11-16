@@ -1,7 +1,7 @@
 # Build customization
 builds:
   - binary: manssh
-    main: ./cmd/main.go
+    main: ./cmd/manssh
     goos:
       - darwin
       - linux
