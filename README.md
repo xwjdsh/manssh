@@ -107,6 +107,10 @@ Update existing alias record, it will replace origin user, hostname, port config
 % manssh backup ./config_backup
  success backup ssh config to [./config_backup] successfully.
 ```
+## Thanks
+* [kevinburke/ssh_config](https://github.com/kevinburke/ssh_config)
+* [urfave/cli](https://github.com/urfave/cli)
+* [emre/storm](https://github.com/emre/storm)
 
 ## Licence
 [MIT License](https://github.com/xwjdsh/manssh/blob/master/LICENSE)
