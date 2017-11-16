@@ -58,8 +58,8 @@ func TestQuery(t *testing.T) {
 func TestCheckAlias(t *testing.T) {
 	Convey("init", t, func() {
 		aliasMap := map[string]*ssh_config.Host{
-			"test1": &ssh_config.Host{},
-			"test2": &ssh_config.Host{},
+			"test1": {},
+			"test2": {},
 		}
 		Convey("check", func() {
 			So(CheckAlias(aliasMap, true, "test1", "test2"), ShouldBeNil)
