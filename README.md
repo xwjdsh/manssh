@@ -1,11 +1,11 @@
 # manssh
 
 [![Release](http://github-release-version.herokuapp.com/github/xwjdsh/manssh/release.svg?style=flat)](https://github.com/xwjdsh/manssh/releases/latest)
-[![DUB](https://img.shields.io/dub/l/vibe-d.svg)](https://github.com/xwjdsh/manssh/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/xwjdsh/manssh.svg?branch=master)](https://travis-ci.org/xwjdsh/manssh)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xwjdsh/manssh)](https://goreportcard.com/report/github.com/xwjdsh/manssh)
 [![GoCover.io](https://img.shields.io/badge/gocover.io-89.0%25-green.svg)](https://gocover.io/github.com/xwjdsh/manssh)
-[![GoDoc](https://godoc.org/github.com/xwjdsh/manssh?status.svg)](https://godoc.org/github.com/xwjdsh/manssh)
+[![GoDoc](https://godoc.org/github.com/xwjdsh/manssh?status.svg)](https://godoc.org/github.com/xwjdsh/manssh
+[![DUB](https://img.shields.io/dub/l/vibe-d.svg)](https://github.com/xwjdsh/manssh/blob/master/LICENSE)
 
 manssh is a command line tool for managing your ssh alias config easily, inspired by [storm](https://github.com/emre/storm) project, powered by Go.
 
