@@ -1,6 +1,7 @@
 package manssh
 
 import (
+	"os/user"
 	"testing"
 
 	"github.com/kevinburke/ssh_config"
@@ -15,14 +16,19 @@ func TestFormatConnect(t *testing.T) {
 
 func TestParseConnct(t *testing.T) {
 	Convey("init", t, func() {
-		user, hostname, port := ParseConnct("root@1.1.1.1:77")
-		So([]string{user, hostname, port}, ShouldResemble, []string{"root", "1.1.1.1", "77"})
+		currentUser := ""
+		tmp, err := user.Current()
+		if err == nil {
+			currentUser = tmp.Username
+		}
+		u, hostname, port := ParseConnct("root@1.1.1.1:77")
+		So([]string{u, hostname, port}, ShouldResemble, []string{"root", "1.1.1.1", "77"})
 
-		user, hostname, port = ParseConnct("1.1.1.1:77")
-		So([]string{user, hostname, port}, ShouldResemble, []string{GetHomeDir(), "1.1.1.1", "77"})
+		u, hostname, port = ParseConnct("1.1.1.1:77")
+		So([]string{u, hostname, port}, ShouldResemble, []string{currentUser, "1.1.1.1", "77"})
 
-		user, hostname, port = ParseConnct("1.1.1.1")
-		So([]string{user, hostname, port}, ShouldResemble, []string{GetHomeDir(), "1.1.1.1", "22"})
+		u, hostname, port = ParseConnct("1.1.1.1")
+		So([]string{u, hostname, port}, ShouldResemble, []string{currentUser, "1.1.1.1", "22"})
 	})
 }
 
