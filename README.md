@@ -22,7 +22,7 @@ manssh is a command line tool for managing your ssh alias config easily, inspire
 
 #### Gopher
 ```shell
-go get github.com/xwjdsh/manssh
+go get github.com/xwjdsh/manssh/cmd/manssh
 ```
 
 #### Homebrew
