@@ -1,7 +1,7 @@
 language: go
 go: 
- - 1.8
- - 1.9
+ - 1.8.x
+ - 1.9.x
 
 after_success:
   - test "$TRAVIS_GO_VERSION" = "1.8" -a -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
