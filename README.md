@@ -98,7 +98,7 @@ Update existing alias record, it will replace origin user, hostname, port config
 ### Delete one or more alias
 ```shell
 # manssh delete test1
-% manssh update test1 test2
+% manssh delete test1 test2
  success alias[test1,test2] deleted successfully.
 ```
 
