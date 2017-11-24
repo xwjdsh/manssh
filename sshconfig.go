@@ -101,7 +101,6 @@ func Add(path string, host *HostConfig) error {
 		host.Config = map[string]string{}
 	}
 	nodes := []ssh_config.Node{}
-	checkKeyRepeat := map[string]bool{}
 
 	// Parse connect string
 	if host.Connect != "" {
@@ -116,26 +115,16 @@ func Add(path string, host *HostConfig) error {
 
 		portKV := &ssh_config.KV{Key: Port, Value: port}
 		nodes = append(nodes, portKV.SetLeadingSpace(4))
-
-		checkKeyRepeat[User] = true
-		checkKeyRepeat[Hostname] = true
-		checkKeyRepeat[Port] = true
+		delete(host.Config, User)
+		delete(host.Config, Port)
+		delete(host.Config, Hostname)
 	}
 
 	// Get nodes and delete repeat config
-	deleteKeys := []string{}
 	for k, v := range host.Config {
 		lk := strings.ToLower(k)
-		if !checkKeyRepeat[lk] {
-			node := &ssh_config.KV{Key: lk, Value: v}
-			nodes = append(nodes, node.SetLeadingSpace(4))
-			checkKeyRepeat[lk] = true
-		} else {
-			deleteKeys = append(deleteKeys, k)
-		}
-	}
-	for _, deleteKey := range deleteKeys {
-		delete(host.Config, deleteKey)
+		node := &ssh_config.KV{Key: lk, Value: v}
+		nodes = append(nodes, node.SetLeadingSpace(4))
 	}
 
 	pattern, err := ssh_config.NewPattern(host.Aliases)
@@ -174,17 +163,17 @@ func Update(path string, h *HostConfig, newAlias string) error {
 	}
 
 	updateKV := map[string]string{}
+	if h.Config != nil {
+		for k, v := range h.Config {
+			updateKV[strings.ToLower(k)] = v
+		}
+	}
+
 	if h.Connect != "" {
 		user, hostname, port := ParseConnct(h.Connect)
 		updateKV[User] = user
 		updateKV[Hostname] = hostname
 		updateKV[Port] = port
-	}
-
-	if h.Config != nil {
-		for k, v := range h.Config {
-			updateKV[strings.ToLower(k)] = v
-		}
 	}
 	h.Config = map[string]string{}
 	connectMap := map[string]string{}
