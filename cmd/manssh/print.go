@@ -15,16 +15,16 @@ var (
 	globalStyle    = color.New(color.FgMagenta, color.Bold)
 	globalKeyStyle = color.New(color.FgCyan, color.Bold)
 
-	successStyle = color.New(color.BgGreen, color.FgWhite)
-	errorStyle   = color.New(color.BgRed, color.FgWhite)
+	successStyle = color.New(color.FgGreen)
+	errorStyle   = color.New(color.FgRed)
 )
 
 func printSuccessFlag() {
-	successStyle.Printf("%-9s", " success")
+	successStyle.Printf("%s", "\u2714  ")
 }
 
 func printErrorFlag() {
-	errorStyle.Printf("%-7s", " error")
+	errorStyle.Printf("%s", "\u2716  ")
 }
 
 func printErrorWithHelp(c *cli.Context, err error) error {
