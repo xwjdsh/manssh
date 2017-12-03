@@ -11,6 +11,7 @@ func commands() []cli.Command {
 			Aliases: []string{"a"},
 			Flags: []cli.Flag{
 				cli.GenericFlag{Name: "config, c", Value: &kvFlag{}},
+				cli.StringFlag{Name: "identityfile, i"},
 			},
 		},
 		{
@@ -27,6 +28,7 @@ func commands() []cli.Command {
 			Flags: []cli.Flag{
 				cli.GenericFlag{Name: "config, c", Value: &kvFlag{}},
 				cli.StringFlag{Name: "rename, r"},
+				cli.StringFlag{Name: "identityfile, i"},
 			},
 		},
 		{
