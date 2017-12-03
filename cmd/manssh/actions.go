@@ -33,6 +33,12 @@ func add(c *cli.Context) error {
 	if kvConfig := c.Generic("config"); kvConfig != nil {
 		host.Config = kvConfig.(*kvFlag).m
 	}
+	if identityfile := c.String("identityfile"); identityfile != "" {
+		if host.Config == nil {
+			host.Config = map[string]string{}
+		}
+		host.Config["identityfile"] = identityfile
+	}
 
 	if host.Config == nil && host.Connect == "" {
 		return printErrorWithHelp(c, errors.New("param error"))
@@ -58,6 +64,12 @@ func update(c *cli.Context) error {
 	}
 	if kvConfig := c.Generic("config"); kvConfig != nil {
 		host.Config = kvConfig.(*kvFlag).m
+	}
+	if identityfile := c.String("identityfile"); identityfile != "" {
+		if host.Config == nil {
+			host.Config = map[string]string{}
+		}
+		host.Config["identityfile"] = identityfile
 	}
 
 	if err := manssh.Update(path, host, c.String("rename")); err != nil {
