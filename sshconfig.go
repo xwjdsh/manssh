@@ -3,6 +3,7 @@ package manssh
 import (
 	"io/ioutil"
 	"os"
+	"os/user"
 	"strings"
 
 	"github.com/kevinburke/ssh_config"
@@ -75,6 +76,13 @@ func List(path string, keywords ...string) []*HostConfig {
 			continue
 		}
 		if !isGlobal {
+			if connectMap[User] == "" {
+				user, _ := user.Current()
+				connectMap[User] = user.Username
+			}
+			if connectMap[Port] == "" {
+				connectMap[Port] = "22"
+			}
 			h.Connect = FormatConnect(connectMap[User], connectMap[Hostname], connectMap[Port])
 		}
 		hosts = append(hosts, h)
@@ -122,6 +130,9 @@ func Add(path string, host *HostConfig) error {
 
 	// Get nodes and delete repeat config
 	for k, v := range host.Config {
+		if v == "" {
+			continue
+		}
 		lk := strings.ToLower(k)
 		node := &ssh_config.KV{Key: lk, Value: v}
 		nodes = append(nodes, node.SetLeadingSpace(4))
@@ -183,13 +194,20 @@ func Update(path string, h *HostConfig, newAlias string) error {
 		connectMap[Port] = ""
 	}
 	// update node
-	for _, node := range updateHost.Nodes {
-		switch t := node.(type) {
+
+	for i := 0; i >= 0 && i < len(updateHost.Nodes); i++ {
+		switch t := updateHost.Nodes[i].(type) {
 		case *ssh_config.KV:
 			t.Key = strings.ToLower(t.Key)
 			if value, ok := updateKV[t.Key]; ok {
-				t.SetLeadingSpace(4)
-				t.Value = value
+				if value == "" {
+					// Remove node
+					updateHost.Nodes = append(updateHost.Nodes[:i], updateHost.Nodes[i+1:]...)
+					i--
+				} else {
+					t.SetLeadingSpace(4)
+					t.Value = value
+				}
 				delete(updateKV, t.Key)
 			}
 			if _, ok := connectMap[t.Key]; ok {
@@ -201,6 +219,9 @@ func Update(path string, h *HostConfig, newAlias string) error {
 	}
 	// append new node
 	for k, v := range updateKV {
+		if v == "" {
+			continue
+		}
 		kv := &ssh_config.KV{Key: k, Value: v}
 		updateHost.Nodes = append(updateHost.Nodes, kv.SetLeadingSpace(4))
 		if _, ok := connectMap[k]; ok {
@@ -208,6 +229,13 @@ func Update(path string, h *HostConfig, newAlias string) error {
 		} else {
 			h.Config[k] = v
 		}
+	}
+	if connectMap[User] == "" {
+		user, _ := user.Current()
+		connectMap[User] = user.Username
+	}
+	if connectMap[Port] == "" {
+		connectMap[Port] = "22"
 	}
 	h.Connect = FormatConnect(connectMap[User], connectMap[Hostname], connectMap[Port])
 	return ioutil.WriteFile(path, []byte(cfg.String()), 0644)

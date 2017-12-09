@@ -19,7 +19,7 @@ func (kv *kvFlag) Set(value string) error {
 		kv.m = map[string]string{}
 	}
 	parts := strings.Split(value, "=")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 || parts[0] == "" {
 		return fmt.Errorf("flag param(%s) parse error", value)
 	}
 	kv.m[parts[0]] = parts[1]

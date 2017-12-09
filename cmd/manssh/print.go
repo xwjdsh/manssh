@@ -61,6 +61,9 @@ func printHost(host *manssh.HostConfig) {
 		fmt.Printf(" -> %s\n", host.Connect)
 	}
 	for k, v := range host.Config {
+		if v == "" {
+			continue
+		}
 		if isGlobal {
 			globalKeyStyle.Printf("\t\t%s ", k)
 			fmt.Printf("= %s\n", v)
