@@ -20,11 +20,11 @@ var (
 )
 
 func printSuccessFlag() {
-	successStyle.Printf("%s", "\u2714  ")
+	successStyle.Print("✔ ")
 }
 
 func printErrorFlag() {
-	errorStyle.Printf("%s", "\u2716  ")
+	errorStyle.Print("✗ ")
 }
 
 func printErrorWithHelp(c *cli.Context, err error) error {
