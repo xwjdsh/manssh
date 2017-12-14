@@ -198,8 +198,8 @@ func Update(path string, h *HostConfig, newAlias string) error {
 		connectMap[Hostname] = ""
 		connectMap[Port] = ""
 	}
-	// update node
 
+	// update node
 	for i := 0; i >= 0 && i < len(updateHost.Nodes); i++ {
 		switch t := updateHost.Nodes[i].(type) {
 		case *ssh_config.KV:
@@ -212,13 +212,13 @@ func Update(path string, h *HostConfig, newAlias string) error {
 				} else {
 					t.SetLeadingSpace(4)
 					t.Value = value
+					if _, ok := connectMap[t.Key]; ok {
+						connectMap[t.Key] = t.Value
+					} else {
+						h.Config[t.Key] = t.Value
+					}
 				}
 				delete(updateKV, t.Key)
-			}
-			if _, ok := connectMap[t.Key]; ok {
-				connectMap[t.Key] = t.Value
-			} else {
-				h.Config[t.Key] = t.Value
 			}
 		}
 	}
