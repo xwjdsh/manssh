@@ -164,7 +164,12 @@ func Update(path string, h *HostConfig, newAlias string) error {
 
 	updateHost := aliasMap[h.Aliases]
 	if newAlias != "" {
-		// alias rename
+		// new alias should not exist
+		if err := CheckAlias(aliasMap, false, newAlias); err != nil {
+			return err
+		}
+
+		// rename alias
 		for _, pattern := range updateHost.Patterns {
 			if pattern.String() == h.Aliases {
 				pattern.SetStr(newAlias)
