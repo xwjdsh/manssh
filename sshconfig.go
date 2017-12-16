@@ -205,20 +205,20 @@ func Update(path string, h *HostConfig, newAlias string) error {
 		case *ssh_config.KV:
 			t.Key = strings.ToLower(t.Key)
 			if value, ok := updateKV[t.Key]; ok {
+				delete(updateKV, t.Key)
 				if value == "" {
 					// Remove node
 					updateHost.Nodes = append(updateHost.Nodes[:i], updateHost.Nodes[i+1:]...)
 					i--
-				} else {
-					t.SetLeadingSpace(4)
-					t.Value = value
-					if _, ok := connectMap[t.Key]; ok {
-						connectMap[t.Key] = t.Value
-					} else {
-						h.Config[t.Key] = t.Value
-					}
+					continue
 				}
-				delete(updateKV, t.Key)
+				t.SetLeadingSpace(4)
+				t.Value = value
+			}
+			if _, ok := connectMap[t.Key]; ok {
+				connectMap[t.Key] = t.Value
+			} else {
+				h.Config[t.Key] = t.Value
 			}
 		}
 	}
