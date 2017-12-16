@@ -9,7 +9,7 @@
 
 manssh is a command line tool for managing your ssh alias config easily, inspired by [storm](https://github.com/emre/storm) project, powered by Go.
 
-![](https://raw.githubusercontent.com/xwjdsh/manssh/master/screenshot/manssh.gif)
+![](https://raw.githubusercontent.com/xwjdsh/manssh/master/screenshot/manssh-12-16.gif)
 
 ## Feature
 
