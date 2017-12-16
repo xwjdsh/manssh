@@ -3,10 +3,15 @@ package main
 import (
 	"errors"
 	"io/ioutil"
+	"log"
 	"strings"
 
 	"github.com/urfave/cli"
 	"github.com/xwjdsh/manssh"
+)
+
+const (
+	IdentityFile = "identityfile"
 )
 
 var (
@@ -33,11 +38,11 @@ func add(c *cli.Context) error {
 	if kvConfig := c.Generic("config"); kvConfig != nil {
 		host.Config = kvConfig.(*kvFlag).m
 	}
-	if identityfile := c.String("identityfile"); identityfile != "" {
+	if identityfile := c.String(IdentityFile); identityfile != "" {
 		if host.Config == nil {
 			host.Config = map[string]string{}
 		}
-		host.Config["identityfile"] = identityfile
+		host.Config[IdentityFile] = identityfile
 	}
 
 	if host.Config == nil && host.Connect == "" {
@@ -65,13 +70,15 @@ func update(c *cli.Context) error {
 	if kvConfig := c.Generic("config"); kvConfig != nil {
 		host.Config = kvConfig.(*kvFlag).m
 	}
-	if identityfile := c.String("identityfile"); identityfile != "" {
+	c.FlagNames()
+	if identityfile := c.String(IdentityFile); identityfile != "" || c.IsSet(IdentityFile) {
 		if host.Config == nil {
 			host.Config = map[string]string{}
 		}
-		host.Config["identityfile"] = identityfile
+		host.Config[IdentityFile] = identityfile
 	}
 
+	log.Println(host.Config)
 	if err := manssh.Update(path, host, c.String("rename")); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
