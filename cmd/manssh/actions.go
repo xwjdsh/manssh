@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"io/ioutil"
-	"log"
 	"strings"
 
 	"github.com/urfave/cli"
@@ -78,7 +77,6 @@ func update(c *cli.Context) error {
 		host.Config[IdentityFile] = identityfile
 	}
 
-	log.Println(host.Config)
 	if err := manssh.Update(path, host, c.String("rename")); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)

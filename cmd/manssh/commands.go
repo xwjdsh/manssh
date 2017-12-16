@@ -22,7 +22,7 @@ func commands() []cli.Command {
 		},
 		{
 			Name:    "update",
-			Usage:   "Update SSH record by specified alias name",
+			Usage:   "Update SSH record by specifying alias name",
 			Action:  update,
 			Aliases: []string{"u"},
 			Flags: []cli.Flag{
@@ -33,7 +33,7 @@ func commands() []cli.Command {
 		},
 		{
 			Name:    "delete",
-			Usage:   "Delete SSH records by specified alias names",
+			Usage:   "Delete SSH records by specifying alias names",
 			Action:  delete,
 			Aliases: []string{"d"},
 		},

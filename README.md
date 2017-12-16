@@ -32,7 +32,7 @@ brew install xwjdsh/tap/manssh
 ```
 
 #### Manual
-Download it from [releases](https://github.com/xwjdsh/manssh/releases), and extact it to your `PATH` directory.
+Download it from [releases](https://github.com/xwjdsh/manssh/releases), and extract it to your `PATH` directory.
 
 ## Usage
 ```text
@@ -49,8 +49,8 @@ VERSION:
 COMMANDS:
      add, a     Add a new SSH alias record
      list, l    List or query SSH alias records
-     update, u  Update SSH record by specified alias name
-     delete, d  Delete SSH records by specified alias names
+     update, u  Update SSH record by specifying alias name
+     delete, d  Delete SSH records by specifying alias names
      backup, b  Backup SSH alias config records
      help, h    Shows a list of commands or help for one command
 
@@ -63,50 +63,54 @@ GLOBAL OPTIONS:
 ### Add a new alias
 ```shell
 # manssh add test2 2.2.2.2
-% manssh add test1 root@1.1.1.1:77 -c IdentityFile=~/.ssh/wendell
- success alias[test1] added successfully.
+# manssh add test1 root@1.1.1.1:77 -c IdentityFile=~/.ssh/wendell
+% manssh add test1 root@1.1.1.1:77 -i ~/.ssh/wendell
+✔ alias[test1] added successfully.
 
         test1 -> root@1.1.1.1:77
-                IdentityFile = ~/.ssh/wendell
+                identityfile = /Users/wendell/.ssh/wendell
 ```
-Using `-c` to set more config options, username and port config is optional, the username is current login username and port is `22` by default.
+Username and port config is optional, the username is current login username and port is `22` by default.
+Using `-c` to set more config options. For convenience, `-i xxx` can instead of `-c identityfile=xxx`.
 
 ### List or query alias
 ```shell
 # manssh list
 # manssh list "*"
 % manssh list test1 77
- success Listing 1 records.
+✔ Listing 1 records.
 
         test1 -> root@1.1.1.1:77
-                IdentityFile = ~/.ssh/wendell
+                identityfile = /Users/wendell/.ssh/wendell
 ```
 It will display all alias records If no params offered, or it will using params as keywords query alias records. 
 
-### Update a alias
+### Update an alias
 ```shell
 # manssh update test1 -r test2
 # manssh update test1 root@1.1.1.1:22022
-% manssh update test1 -r test3 -c user=wendell -c port=22022
- success alias[test3] updated successfully.
+% manssh update test1 -i "" -r test3 -c hostname=3.3.3.3 -c port=22022
+✔ alias[test3] updated successfully.
 
-        test3 -> wendell@1.1.1.1:22022
-                identityfile = ~/.ssh/wendell
+        test3 -> root@3.3.3.3:22022
 ```
-Update existing alias record, it will replace origin user, hostname, port config if connect string param offered, you can using `-c` to update single and extra config option. Rename alias specified by `-r` flag.
+Update an existing alias record, it will replace origin user, hostname, port config's if connected string param offered.
+You can use `-c` to update single and extra config option, `-c identityfile= -c proxycommand=` will remove `identityfile` and `proxycommand` options. For convenience, `-i xxx` can instead of `-c identityfile=xxx`
+Rename the alias specified by `-r` flag.
 
 ### Delete one or more alias
 ```shell
 # manssh delete test1
 % manssh delete test1 test2
- success alias[test1,test2] deleted successfully.
+✔ alias[test1,test2] deleted successfully.
 ```
 
 ### Backup ssh config
 ```
 % manssh backup ./config_backup
- success backup ssh config to [./config_backup] successfully.
+✔ backup ssh config to [./config_backup] successfully.
 ```
+
 ## Thanks
 * [kevinburke/ssh_config](https://github.com/kevinburke/ssh_config)
 * [urfave/cli](https://github.com/urfave/cli)
