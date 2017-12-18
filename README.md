@@ -70,7 +70,7 @@ GLOBAL OPTIONS:
         test1 -> root@1.1.1.1:77
                 identityfile = /Users/wendell/.ssh/wendell
 ```
-Username and port config is optional, the username is current login username and port is `22` by default.
+Username and port config is optional, the username is current login username and port is `22` by default.<br/>
 Using `-c` to set more config options. For convenience, `-i xxx` can instead of `-c identityfile=xxx`.
 
 ### List or query alias
@@ -94,8 +94,9 @@ It will display all alias records If no params offered, or it will using params 
 
         test3 -> root@3.3.3.3:22022
 ```
-Update an existing alias record, it will replace origin user, hostname, port config's if connected string param offered.
-You can use `-c` to update single and extra config option, `-c identityfile= -c proxycommand=` will remove `identityfile` and `proxycommand` options. For convenience, `-i xxx` can instead of `-c identityfile=xxx`
+Update an existing alias record, it will replace origin user, hostname, port config's if connected string param offered.<br/>
+You can use `-c` to update single and extra config option, `-c identityfile= -c proxycommand=` will remove `identityfile` and `proxycommand` options. <br/>
+For convenience, `-i xxx` can instead of `-c identityfile=xxx`<br/>
 Rename the alias specified by `-r` flag.
 
 ### Delete one or more alias
