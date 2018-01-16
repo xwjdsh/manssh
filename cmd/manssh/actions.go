@@ -9,10 +9,6 @@ import (
 	"github.com/xwjdsh/manssh"
 )
 
-const (
-	IdentityFile = "identityfile"
-)
-
 var (
 	path string
 )
@@ -37,11 +33,11 @@ func add(c *cli.Context) error {
 	if kvConfig := c.Generic("config"); kvConfig != nil {
 		host.Config = kvConfig.(*kvFlag).m
 	}
-	if identityfile := c.String(IdentityFile); identityfile != "" {
+	if identityfile := c.String("identityfile"); identityfile != "" {
 		if host.Config == nil {
 			host.Config = map[string]string{}
 		}
-		host.Config[IdentityFile] = identityfile
+		host.Config[manssh.IdentityFile] = identityfile
 	}
 
 	if host.Config == nil && host.Connect == "" {
@@ -70,11 +66,11 @@ func update(c *cli.Context) error {
 		host.Config = kvConfig.(*kvFlag).m
 	}
 	c.FlagNames()
-	if identityfile := c.String(IdentityFile); identityfile != "" || c.IsSet(IdentityFile) {
+	if identityfile := c.String("identityfile"); identityfile != "" || c.IsSet("identityfile") {
 		if host.Config == nil {
 			host.Config = map[string]string{}
 		}
-		host.Config[IdentityFile] = identityfile
+		host.Config[manssh.IdentityFile] = identityfile
 	}
 
 	if err := manssh.Update(path, host, c.String("rename")); err != nil {
