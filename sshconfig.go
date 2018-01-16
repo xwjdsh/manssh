@@ -16,6 +16,8 @@ const (
 	Hostname = "hostname"
 	// Port is a ssh config key
 	Port = "port"
+	// IdentityFile is a ssh config key
+	IdentityFile = "identityfile"
 )
 
 // ParseConfig parse configs from ssh config file, return config object and alias map
