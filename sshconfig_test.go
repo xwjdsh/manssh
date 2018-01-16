@@ -21,7 +21,7 @@ Host test2
 
 Host test3
     hostname 192.168.99.30
-    user root
+    user ROOT
 		port 77
 `
 
@@ -35,9 +35,11 @@ func TestList(t *testing.T) {
 		return
 	}
 	Convey("init", t, func() {
-		So(len(List(f.Name())), ShouldEqual, 3)
-		So(len(List(f.Name(), "77")), ShouldEqual, 2)
-		So(len(List(f.Name(), "test", "77", "30")), ShouldEqual, 1)
+		So(len(List(f.Name(), nil)), ShouldEqual, 3)
+		So(len(List(f.Name(), []string{"77"})), ShouldEqual, 2)
+		So(len(List(f.Name(), []string{"root"})), ShouldEqual, 2)
+		So(len(List(f.Name(), []string{"root"}, true)), ShouldEqual, 3)
+		So(len(List(f.Name(), []string{"test", "77", "30"})), ShouldEqual, 1)
 	})
 }
 
@@ -56,7 +58,7 @@ func TestAdd(t *testing.T) {
 		add := &HostConfig{Aliases: "test4", Connect: "root@2.2.2.2"}
 		So(Add(f.Name(), add), ShouldBeNil)
 		So(add, ShouldResemble, &HostConfig{Aliases: "test4", Connect: "root@2.2.2.2:22", Config: map[string]string{}})
-		So(List(f.Name(), "test4"), ShouldResemble, []*HostConfig{add})
+		So(List(f.Name(), []string{"test4"}), ShouldResemble, []*HostConfig{add})
 	})
 }
 
@@ -80,14 +82,14 @@ func TestUpdate(t *testing.T) {
 		So(Update(f.Name(), update3, "test4"), ShouldBeNil)
 
 		So(update1, ShouldResemble, &HostConfig{Aliases: "test1", Connect: "root@2.2.2.2:77", Config: map[string]string{}})
-		So(List(f.Name(), "test1"), ShouldResemble, []*HostConfig{update1})
+		So(List(f.Name(), []string{"test1"}), ShouldResemble, []*HostConfig{update1})
 
 		So(update2, ShouldResemble, &HostConfig{Aliases: "test2", Connect: "wendell@192.168.99.20:77", Config: map[string]string{}})
-		So(List(f.Name(), "test2"), ShouldResemble, []*HostConfig{update2})
+		So(List(f.Name(), []string{"test2"}), ShouldResemble, []*HostConfig{update2})
 
-		So(update3, ShouldResemble, &HostConfig{Aliases: "test4", Connect: "root@192.168.99.30:77", Config: map[string]string{}})
-		So(List(f.Name(), "test3"), ShouldBeEmpty)
-		So(List(f.Name(), "test4"), ShouldResemble, []*HostConfig{update3})
+		So(update3, ShouldResemble, &HostConfig{Aliases: "test4", Connect: "ROOT@192.168.99.30:77", Config: map[string]string{}})
+		So(List(f.Name(), []string{"test3"}), ShouldBeEmpty)
+		So(List(f.Name(), []string{"test4"}), ShouldResemble, []*HostConfig{update3})
 	})
 }
 
@@ -104,8 +106,8 @@ func TestDelete(t *testing.T) {
 		So(Delete(f.Name(), "test4"), ShouldNotBeNil)
 
 		So(Delete(f.Name(), "test1", "test2"), ShouldBeNil)
-		So(List(f.Name(), "test1"), ShouldBeEmpty)
-		So(List(f.Name(), "test2"), ShouldBeEmpty)
-		So(len(List(f.Name())), ShouldEqual, 1)
+		So(List(f.Name(), []string{"test1"}), ShouldBeEmpty)
+		So(List(f.Name(), []string{"test2"}), ShouldBeEmpty)
+		So(len(List(f.Name(), nil)), ShouldEqual, 1)
 	})
 }

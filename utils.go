@@ -55,17 +55,23 @@ func ArgumentsCheck(argCount, min, max int) error {
 }
 
 // Query values contains keys
-func Query(values, keys []string) bool {
+func Query(values, keys []string, ignoreCase bool) bool {
 	for _, key := range keys {
-		if !contains(values, key) {
+		if !contains(values, key, ignoreCase) {
 			return false
 		}
 	}
 	return true
 }
 
-func contains(values []string, key string) bool {
+func contains(values []string, key string, ignoreCase bool) bool {
+	if ignoreCase {
+		key = strings.ToLower(key)
+	}
 	for _, value := range values {
+		if ignoreCase {
+			value = strings.ToLower(value)
+		}
 		if strings.Contains(value, key) {
 			return true
 		}
