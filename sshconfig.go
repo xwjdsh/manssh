@@ -34,7 +34,7 @@ func ParseConfig(path string) (*ssh_config.Config, map[string]*ssh_config.Host) 
 }
 
 // List ssh alias, filter by optional keyword
-func List(path string, keywords ...string) []*HostConfig {
+func List(path string, keywords []string, ignoreCase ...bool) []*HostConfig {
 	cfg, _ := ParseConfig(path)
 	hosts := []*HostConfig{}
 
@@ -74,7 +74,7 @@ func List(path string, keywords ...string) []*HostConfig {
 		if isGlobal && len(h.Config) == 0 {
 			continue
 		}
-		if len(keywords) > 0 && !Query(values, keywords) {
+		if keywords != nil && len(keywords) > 0 && !Query(values, keywords, len(ignoreCase) > 0 && ignoreCase[0]) {
 			continue
 		}
 		if !isGlobal {

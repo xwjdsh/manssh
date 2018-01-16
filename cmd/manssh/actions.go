@@ -14,7 +14,7 @@ var (
 )
 
 func list(c *cli.Context) error {
-	hosts := manssh.List(path, c.Args()...)
+	hosts := manssh.List(path, c.Args(), c.Bool("ignorecase"))
 	printSuccessFlag()
 	printMessage("Listing %d records.\n\n", len(hosts))
 	printHosts(hosts)

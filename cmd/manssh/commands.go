@@ -19,6 +19,9 @@ func commands() []cli.Command {
 			Usage:   "List or query SSH alias records",
 			Action:  list,
 			Aliases: []string{"l"},
+			Flags: []cli.Flag{
+				cli.BoolFlag{Name: "ignorecase, ic", Usage: "ignore case while searching"},
+			},
 		},
 		{
 			Name:    "update",
