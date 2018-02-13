@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kevinburke/ssh_config"
+	"github.com/xwjdsh/ssh_config"
 )
 
 // FormatConnect return connect string
