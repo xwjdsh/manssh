@@ -6,7 +6,7 @@ import (
 	"os/user"
 	"strings"
 
-	"github.com/kevinburke/ssh_config"
+	"github.com/xwjdsh/ssh_config"
 )
 
 const (

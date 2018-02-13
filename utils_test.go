@@ -4,8 +4,8 @@ import (
 	"os/user"
 	"testing"
 
-	"github.com/kevinburke/ssh_config"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/xwjdsh/ssh_config"
 )
 
 func TestFormatConnect(t *testing.T) {
