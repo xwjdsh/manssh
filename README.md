@@ -77,13 +77,15 @@ Using `-c` to set more config options. For convenience, `-i xxx` can instead of 
 ```shell
 # manssh list
 # manssh list "*"
+# manssh list Test -ic
 % manssh list test1 77
 ✔ Listing 1 records.
 
         test1 -> root@1.1.1.1:77
                 identityfile = /Users/wendell/.ssh/wendell
 ```
-It will display all alias records If no params offered, or it will using params as keywords query alias records. 
+It will display all alias records If no params offered, or it will using params as keywords query alias records.<br/>
+If there is a `-it` option, it will ignore case when searching.
 
 ### Update an alias
 ```shell
