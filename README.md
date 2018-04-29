@@ -1,6 +1,5 @@
 # manssh
 
-[![Release](http://github-release-version.herokuapp.com/github/xwjdsh/manssh/release.svg?style=flat)](https://github.com/xwjdsh/manssh/releases/latest)
 [![Build Status](https://travis-ci.org/xwjdsh/manssh.svg?branch=master)](https://travis-ci.org/xwjdsh/manssh)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xwjdsh/manssh)](https://goreportcard.com/report/github.com/xwjdsh/manssh)
 [![GoCover.io](https://img.shields.io/badge/gocover.io-89.0%25-green.svg)](https://gocover.io/github.com/xwjdsh/manssh)
@@ -29,6 +28,11 @@ go get -u github.com/xwjdsh/manssh/cmd/manssh
 ```shell
 brew tap xwjdsh/tap
 brew install xwjdsh/tap/manssh
+```
+
+#### Docker
+```shell
+alias manssh='docker run -t --rm -v ~/.ssh/config:/root/.ssh/config wendellsun/manssh'
 ```
 
 #### Manual
