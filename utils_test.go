@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-	"github.com/xwjdsh/ssh_config"
 )
 
 func TestFormatConnect(t *testing.T) {
@@ -60,7 +59,7 @@ func TestQuery(t *testing.T) {
 
 func TestCheckAlias(t *testing.T) {
 	Convey("init", t, func() {
-		aliasMap := map[string]*ssh_config.Host{
+		aliasMap := map[string]*sshConfigHost{
 			"test1": {},
 			"test2": {},
 		}
