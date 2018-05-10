@@ -152,6 +152,9 @@ func List(path string, keywords []string, ignoreCase ...bool) ([]*HostConfig, er
 
 // Add ssh host config to ssh config file
 func Add(path string, host *HostConfig, addPath string) error {
+	if addPath == "" {
+		addPath = path
+	}
 	configMap, aliasMap, err := ParseConfig(path)
 	if err != nil {
 		return err
