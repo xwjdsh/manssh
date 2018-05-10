@@ -43,7 +43,7 @@ import (
 	"sync"
 )
 
-const version = "0.3"
+const version = "0.4"
 
 type configFinder func() string
 
@@ -592,6 +592,11 @@ func NewInclude(directives []string, hasEquals bool, pos Position, comment strin
 // Pos returns the position of the Include directive in the larger file.
 func (i *Include) Pos() Position {
 	return i.position
+}
+
+// GetFiles get files
+func (i *Include) GetFiles() map[string]*Config {
+	return i.files
 }
 
 // Get finds the first value in the Include statement matching the alias and the
