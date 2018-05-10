@@ -50,13 +50,13 @@ func add(c *cli.Context) error {
 	}
 
 	addPath := c.String("path")
-	if addPath == "" {
-		addPath = path
-	}
-	addPath, err := filepath.Abs(addPath)
-	if err != nil {
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
+	if addPath != "" {
+		var err error
+		addPath, err = filepath.Abs(addPath)
+		if err != nil {
+			printErrorFlag()
+			return cli.NewExitError(err, 1)
+		}
 	}
 
 	if err := manssh.Add(path, host, addPath); err != nil {
