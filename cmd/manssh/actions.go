@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 
 	"github.com/urfave/cli"
@@ -14,7 +15,11 @@ var (
 )
 
 func list(c *cli.Context) error {
-	hosts := manssh.List(path, c.Args(), c.Bool("ignorecase"))
+	hosts, err := manssh.List(path, c.Args(), c.Bool("ignorecase"))
+	if err != nil {
+		printErrorFlag()
+		return cli.NewExitError(err, 1)
+	}
 	printSuccessFlag()
 	printMessage("Listing %d records.\n\n", len(hosts))
 	printHosts(hosts)
@@ -44,7 +49,17 @@ func add(c *cli.Context) error {
 		return printErrorWithHelp(c, errors.New("param error"))
 	}
 
-	if err := manssh.Add(path, host); err != nil {
+	addPath := c.String("path")
+	if addPath != "" {
+		var err error
+		addPath, err = filepath.Abs(addPath)
+		if err != nil {
+			printErrorFlag()
+			return cli.NewExitError(err, 1)
+		}
+	}
+
+	if err := manssh.Add(path, host, addPath); err != nil {
 		printErrorFlag()
 		return cli.NewExitError(err, 1)
 	}

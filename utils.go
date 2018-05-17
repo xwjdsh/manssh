@@ -7,8 +7,6 @@ import (
 	"os/user"
 	"strconv"
 	"strings"
-
-	"github.com/xwjdsh/ssh_config"
 )
 
 // FormatConnect return connect string
@@ -89,7 +87,7 @@ func GetHomeDir() string {
 }
 
 // CheckAlias check alias exist or not
-func CheckAlias(aliasMap map[string]*ssh_config.Host, expectExist bool, aliases ...string) error {
+func CheckAlias(aliasMap map[string]*sshConfigHost, expectExist bool, aliases ...string) error {
 	for _, alias := range aliases {
 		ok := aliasMap[alias] != nil
 		if !ok && expectExist {
