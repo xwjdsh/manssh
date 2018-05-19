@@ -22,7 +22,7 @@ func list(c *cli.Context) error {
 	}
 	printSuccessFlag()
 	printMessage("Listing %d records.\n\n", len(hosts))
-	printHosts(hosts)
+	printHosts(hosts, c.Bool("path"))
 	return nil
 }
 
@@ -65,7 +65,7 @@ func add(c *cli.Context) error {
 	}
 	printSuccessFlag()
 	printMessage("alias[%s] added successfully.\n\n", host.Aliases)
-	printHost(host)
+	printHost(host, c.Bool("path"))
 	return nil
 }
 
@@ -95,7 +95,7 @@ func update(c *cli.Context) error {
 
 	printSuccessFlag()
 	printMessage("alias[%s] updated successfully.\n\n", host.Aliases)
-	printHost(host)
+	printHost(host, c.Bool("path"))
 	return nil
 }
 

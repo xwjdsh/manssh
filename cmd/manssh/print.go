@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -10,7 +11,7 @@ import (
 
 var (
 	messageStyle = color.New(color.FgWhite, color.Bold)
-	aliasStyle   = color.New(color.FgYellow, color.Bold)
+	aliasStyle   = color.New(color.FgMagenta, color.Bold)
 
 	globalStyle    = color.New(color.FgMagenta, color.Bold)
 	globalKeyStyle = color.New(color.FgCyan, color.Bold)
@@ -34,17 +35,17 @@ func printErrorWithHelp(c *cli.Context, err error) error {
 	return cli.NewExitError(err, 1)
 }
 
-func printHosts(hosts []*manssh.HostConfig) {
+func printHosts(hosts []*manssh.HostConfig, showPath bool) {
 	var global *manssh.HostConfig
 	for _, host := range hosts {
 		if host.Aliases == "*" {
 			global = host
 			continue
 		}
-		printHost(host)
+		printHost(host, showPath)
 	}
 	if global != nil && global.Config != nil && len(global.Config) > 0 {
-		printHost(global)
+		printHost(global, showPath)
 	}
 }
 
@@ -52,13 +53,19 @@ func printMessage(format string, a ...interface{}) {
 	messageStyle.Printf(format, a...)
 }
 
-func printHost(host *manssh.HostConfig) {
+func printHost(host *manssh.HostConfig, showPath bool) {
 	isGlobal := host.Aliases == "*"
 	if isGlobal {
 		globalStyle.Printf("\t(*) Global Configs\n")
 	} else {
 		aliasStyle.Printf("\t%s", host.Aliases)
-		fmt.Printf(" -> %s\n", host.Connect)
+		if showPath && host.Path != "" {
+			if homeDir := manssh.GetHomeDir(); strings.HasPrefix(host.Path, homeDir) {
+				host.Path = strings.Replace(host.Path, homeDir, "~", 1)
+			}
+			fmt.Printf("(%s)", host.Path)
+		}
+		fmt.Printf(" -> %s\n", color.GreenString(host.Connect))
 	}
 	for k, v := range host.Config {
 		if v == "" {

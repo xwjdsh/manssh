@@ -6,6 +6,8 @@ type HostConfig struct {
 	Aliases string
 	// Connect string format is user@host:port
 	Connect string
+	// Path found in which file
+	Path string
 	// Config is other configs
 	Config map[string]string
 }

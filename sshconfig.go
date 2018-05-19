@@ -96,6 +96,7 @@ func List(path string, keywords []string, ignoreCase ...bool) ([]*HostConfig, er
 		h := &HostConfig{
 			Aliases: strings.Join(aliases, " "),
 			Config:  map[string]string{},
+			Path:    host.path,
 		}
 		isGlobal := h.Aliases == "*"
 		connectMap := map[string]string{}
@@ -155,6 +156,8 @@ func Add(path string, host *HostConfig, addPath string) error {
 	if addPath == "" {
 		addPath = path
 	}
+	host.Path = addPath
+
 	configMap, aliasMap, err := ParseConfig(path)
 	if err != nil {
 		return err
@@ -237,6 +240,8 @@ func Update(path string, h *HostConfig, newAlias string) error {
 	}
 
 	updateHost := aliasMap[h.Aliases]
+	h.Path = updateHost.path
+
 	if newAlias != "" {
 		// new alias should not exist
 		if err := CheckAlias(aliasMap, false, newAlias); err != nil {
