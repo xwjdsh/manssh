@@ -12,7 +12,7 @@ func commands() []cli.Command {
 			Flags: []cli.Flag{
 				cli.GenericFlag{Name: "config, c", Value: &kvFlag{}},
 				cli.StringFlag{Name: "identityfile, i"},
-				cli.StringFlag{Name: "path, p", EnvVar: "MANSSH_DEFAULT_ADD_PATH"},
+				cli.StringFlag{Name: "addpath, ap", EnvVar: "MANSSH_ADD_PATH"},
 			},
 		},
 		{

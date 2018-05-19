@@ -49,7 +49,7 @@ func add(c *cli.Context) error {
 		return printErrorWithHelp(c, errors.New("param error"))
 	}
 
-	addPath := c.String("path")
+	addPath := c.String("addpath")
 	if addPath != "" {
 		var err error
 		addPath, err = filepath.Abs(addPath)
