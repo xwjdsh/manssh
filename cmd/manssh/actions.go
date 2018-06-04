@@ -2,12 +2,13 @@ package main
 
 import (
 	"errors"
-	"io/ioutil"
+	"fmt"
 	"path/filepath"
-	"strings"
+
+	"github.com/xwjdsh/manssh"
+	"github.com/xwjdsh/manssh/utils"
 
 	"github.com/urfave/cli"
-	"github.com/xwjdsh/manssh"
 )
 
 var (
@@ -15,120 +16,122 @@ var (
 )
 
 func list(c *cli.Context) error {
-	hosts, err := manssh.List(path, c.Args(), c.Bool("ignorecase"))
+	hosts, err := manssh.List(path, manssh.ListOption{
+		Keywords:   c.Args(),
+		IgnoreCase: c.Bool("ignorecase"),
+	})
 	if err != nil {
-		printErrorFlag()
+		fmt.Printf(utils.ErrorFlag)
 		return cli.NewExitError(err, 1)
 	}
-	printSuccessFlag()
-	printMessage("Listing %d records.\n\n", len(hosts))
-	printHosts(hosts, c.Bool("path"))
+	fmt.Printf("%s total records: %d\n\n", utils.SuccessFlag, len(hosts))
+	printHosts(c.Bool("path"), hosts)
 	return nil
 }
 
 func add(c *cli.Context) error {
 	// Check arguments count
-	if err := manssh.ArgumentsCheck(c.NArg(), 1, 2); err != nil {
+	if err := utils.ArgumentsCheck(c.NArg(), 1, 2); err != nil {
 		return printErrorWithHelp(c, err)
 	}
-	host := &manssh.HostConfig{
-		Aliases: c.Args().Get(0),
+	ao := &manssh.AddOption{
+		Alias:   c.Args().Get(0),
 		Connect: c.Args().Get(1),
+		Path:    c.String("addpath"),
+		Config:  map[string]string{},
 	}
-	if kvConfig := c.Generic("config"); kvConfig != nil {
-		host.Config = kvConfig.(*kvFlag).m
-	}
-	if identityfile := c.String("identityfile"); identityfile != "" {
-		if host.Config == nil {
-			host.Config = map[string]string{}
-		}
-		host.Config[manssh.IdentityFile] = identityfile
-	}
-
-	if host.Config == nil && host.Connect == "" {
-		return printErrorWithHelp(c, errors.New("param error"))
-	}
-
-	addPath := c.String("addpath")
-	if addPath != "" {
+	if ao.Path != "" {
 		var err error
-		addPath, err = filepath.Abs(addPath)
-		if err != nil {
-			printErrorFlag()
+		if ao.Path, err = filepath.Abs(ao.Path); err != nil {
+			fmt.Printf(utils.ErrorFlag)
 			return cli.NewExitError(err, 1)
 		}
 	}
+	if kvConfig := c.Generic("config"); kvConfig != nil {
+		ao.Config = kvConfig.(*kvFlag).m
+	}
 
-	if err := manssh.Add(path, host, addPath); err != nil {
-		printErrorFlag()
+	if identityfile := c.String("identityfile"); identityfile != "" {
+		ao.Config["identityfile"] = identityfile
+	}
+
+	if ao.Config == nil && ao.Connect == "" {
+		return printErrorWithHelp(c, errors.New("param error"))
+	}
+
+	host, err := manssh.Add(path, ao)
+	if err != nil {
+		fmt.Printf(utils.ErrorFlag)
 		return cli.NewExitError(err, 1)
 	}
-	printSuccessFlag()
-	printMessage("alias[%s] added successfully.\n\n", host.Aliases)
-	printHost(host, c.Bool("path"))
+	fmt.Printf("%s added successfully\n", utils.SuccessFlag)
+	if host != nil {
+		fmt.Println()
+		printHost(c.Bool("path"), host)
+	}
 	return nil
 }
 
 func update(c *cli.Context) error {
-	if err := manssh.ArgumentsCheck(c.NArg(), 1, 2); err != nil {
+	if err := utils.ArgumentsCheck(c.NArg(), 1, 2); err != nil {
 		return printErrorWithHelp(c, err)
 	}
-	host := &manssh.HostConfig{
-		Aliases: c.Args().Get(0),
-		Connect: c.Args().Get(1),
+	uo := &manssh.UpdateOption{
+		Alias:    c.Args().Get(0),
+		Connect:  c.Args().Get(1),
+		Config:   map[string]string{},
+		NewAlias: c.String("rename"),
 	}
 	if kvConfig := c.Generic("config"); kvConfig != nil {
-		host.Config = kvConfig.(*kvFlag).m
-	}
-	c.FlagNames()
-	if identityfile := c.String("identityfile"); identityfile != "" || c.IsSet("identityfile") {
-		if host.Config == nil {
-			host.Config = map[string]string{}
-		}
-		host.Config[manssh.IdentityFile] = identityfile
+		uo.Config = kvConfig.(*kvFlag).m
 	}
 
-	if err := manssh.Update(path, host, c.String("rename")); err != nil {
-		printErrorFlag()
+	if identityfile := c.String("identityfile"); identityfile != "" || c.IsSet("identityfile") {
+		uo.Config["identityfile"] = identityfile
+	}
+
+	host, err := manssh.Update(path, uo)
+	if err != nil {
+		fmt.Printf(utils.ErrorFlag)
 		return cli.NewExitError(err, 1)
 	}
 
-	printSuccessFlag()
-	printMessage("alias[%s] updated successfully.\n\n", host.Aliases)
-	printHost(host, c.Bool("path"))
+	fmt.Printf("%s updated successfully.\n\n", utils.SuccessFlag)
+	printHost(c.Bool("path"), host)
 	return nil
 }
 
 func delete(c *cli.Context) error {
-	if err := manssh.ArgumentsCheck(c.NArg(), 1, -1); err != nil {
+	if err := utils.ArgumentsCheck(c.NArg(), 1, -1); err != nil {
 		return printErrorWithHelp(c, err)
 	}
-	if err := manssh.Delete(path, c.Args()...); err != nil {
-		printErrorFlag()
+	hosts, err := manssh.Delete(path, c.Args()...)
+	if err != nil {
+		fmt.Printf(utils.ErrorFlag)
 		return cli.NewExitError(err, 1)
 	}
-	printSuccessFlag()
-	printMessage("alias[%s] deleted successfully.\n", strings.Join(c.Args(), ","))
+	fmt.Printf("%s deleted successfully.\n\n", utils.SuccessFlag)
+	printHosts(c.Bool("path"), hosts)
 	return nil
 }
 
 func backup(c *cli.Context) error {
-	if err := manssh.ArgumentsCheck(c.NArg(), 1, 1); err != nil {
-		return printErrorWithHelp(c, err)
-	}
+	// if err := manssh.ArgumentsCheck(c.NArg(), 1, 1); err != nil {
+	// return printErrorWithHelp(c, err)
+	// }
 
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
-	}
-	backupPath := c.Args().First()
-	err = ioutil.WriteFile(backupPath, data, 0644)
-	if err != nil {
-		printErrorFlag()
-		return cli.NewExitError(err, 1)
-	}
-	printSuccessFlag()
-	printMessage("backup ssh config to [%s] successfully.", backupPath)
+	// data, err := ioutil.ReadFile(path)
+	// if err != nil {
+	// printErrorFlag()
+	// return cli.NewExitError(err, 1)
+	// }
+	// backupPath := c.Args().First()
+	// err = ioutil.WriteFile(backupPath, data, 0644)
+	// if err != nil {
+	// printErrorFlag()
+	// return cli.NewExitError(err, 1)
+	// }
+	// printSuccessFlag()
+	// printMessage("backup ssh config to [%s] successfully.", backupPath)
 	return nil
 }

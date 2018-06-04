@@ -1,59 +1,116 @@
 package manssh
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
-	"os/user"
+	"path"
 	"strings"
+
+	"github.com/xwjdsh/manssh/utils"
 
 	"github.com/xwjdsh/ssh_config"
 )
 
-const (
-	// User is a ssh config key
-	User = "user"
-	// Hostname is a ssh config key
-	Hostname = "hostname"
-	// Port is a ssh config key
-	Port = "port"
-	// IdentityFile is a ssh config key
-	IdentityFile = "identityfile"
-)
-
-type sshConfigHost struct {
-	*ssh_config.Host
-	path string
+func writeConfig(p string, cfg *ssh_config.Config) error {
+	return ioutil.WriteFile(p, []byte(cfg.String()), 0644)
 }
 
-func parseConfig(path string) (*ssh_config.Config, error) {
-	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE, 0600)
+func readFile(p string) (*ssh_config.Config, error) {
+	f, err := os.OpenFile(p, os.O_APPEND|os.O_CREATE, 0600)
 	if err != nil {
 		return nil, err
 	}
 	return ssh_config.Decode(f)
 }
 
-func writeConfig(path string, cfg *ssh_config.Config) error {
-	return ioutil.WriteFile(path, []byte(cfg.String()), 0644)
+func deleteHostFromConfig(config *ssh_config.Config, host *ssh_config.Host) {
+	hs := []*ssh_config.Host{}
+	for _, h := range config.Hosts {
+		if h == host {
+			continue
+		}
+		hs = append(hs, h)
+	}
+	config.Hosts = hs
 }
 
 // ParseConfig parse configs from ssh config file, return config object and alias map
-func ParseConfig(path string) (map[string]*ssh_config.Config, map[string]*sshConfigHost, error) {
-	cfg, err := parseConfig(path)
+func parseConfig(p string) (map[string]*ssh_config.Config, map[string]*HostConfig, error) {
+	cfg, err := readFile(p)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	aliasMap := map[string]*sshConfigHost{}
-	configMap := map[string]*ssh_config.Config{path: cfg}
+	aliasMap := map[string]*HostConfig{}
+	configMap := map[string]*ssh_config.Config{p: cfg}
 
-	addAlias := func(fp string, hosts ...*ssh_config.Host) {
-		for _, host := range hosts {
-			for _, pattern := range host.Patterns {
-				aliasMap[pattern.String()] = &sshConfigHost{
-					Host: host,
-					path: fp,
+	setImplicitConfig := func(hc *HostConfig) {
+		for alias, host := range aliasMap {
+			if alias == hc.Alias {
+				continue
+			}
+
+			if len(hc.OwnConfig) == 0 {
+				if match, err := path.Match(host.Alias, hc.Alias); err == nil && match {
+					for k, v := range host.OwnConfig {
+						if _, ok := hc.ImplicitConfig[k]; !ok {
+							hc.ImplicitConfig[k] = v
+						}
+					}
 				}
+			} else {
+				if match, err := path.Match(hc.Alias, host.Alias); err == nil && match {
+					for k, v := range hc.OwnConfig {
+						if _, ok := host.OwnConfig[k]; !ok {
+							if _, ok := host.ImplicitConfig[k]; !ok {
+								host.ImplicitConfig[k] = v
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	setOwnConfig := func(hc *HostConfig, h *ssh_config.Host) {
+		if host, ok := aliasMap[hc.Alias]; ok {
+			if _, ok := host.PathMap[hc.Path]; !ok {
+				host.PathMap[hc.Path] = []*ssh_config.Host{}
+			}
+			host.PathMap[hc.Path] = append(host.PathMap[hc.Path], h)
+			for k, v := range hc.OwnConfig {
+				if _, ok := host.OwnConfig[k]; !ok {
+					host.OwnConfig[k] = v
+				}
+			}
+		} else {
+			aliasMap[hc.Alias] = hc
+		}
+	}
+
+	addHosts := func(fp string, hosts ...*ssh_config.Host) {
+		for _, host := range hosts {
+			// except implicit `*`
+			if len(host.Nodes) == 0 {
+				continue
+			}
+			for _, pattern := range host.Patterns {
+				alias := pattern.String()
+				hc := NewHostConfig(alias, fp, host)
+				setImplicitConfig(hc)
+
+				for _, node := range host.Nodes {
+					if kvNode, ok := node.(*ssh_config.KV); ok {
+						kvNode.Key = strings.ToLower(kvNode.Key)
+						if _, ok := hc.ImplicitConfig[kvNode.Key]; !ok {
+							hc.OwnConfig[kvNode.Key] = kvNode.Value
+						}
+					}
+				}
+
+				setImplicitConfig(hc)
+				setOwnConfig(hc, host)
 			}
 		}
 	}
@@ -64,80 +121,46 @@ func ParseConfig(path string) (map[string]*ssh_config.Config, map[string]*sshCon
 			case *ssh_config.Include:
 				for fp, config := range t.GetFiles() {
 					configMap[fp] = config
-					addAlias(fp, config.Hosts...)
+					addHosts(fp, config.Hosts...)
 				}
+			case *ssh_config.KV:
+				addHosts(p, host)
 			}
 		}
-		addAlias(path, host)
 	}
+	addHosts(p, &ssh_config.Host{
+		Patterns: []*ssh_config.Pattern{(&ssh_config.Pattern{}).SetStr("*")},
+		Nodes: []ssh_config.Node{
+			&ssh_config.KV{Key: "user", Value: utils.GetUsername()},
+			&ssh_config.KV{Key: "port", Value: "22"},
+		},
+	})
 	return configMap, aliasMap, nil
 }
 
+type ListOption struct {
+	Keywords   []string
+	IgnoreCase bool
+}
+
 // List ssh alias, filter by optional keyword
-func List(path string, keywords []string, ignoreCase ...bool) ([]*HostConfig, error) {
-	configMap, aliasMap, err := ParseConfig(path)
+func List(p string, lo ListOption) ([]*HostConfig, error) {
+	configMap, aliasMap, err := parseConfig(p)
 	if err != nil {
 		return nil, err
 	}
-	hosts := []*HostConfig{}
 
-	// Convert to HostConfig
-	hostMap := map[*ssh_config.Host]bool{}
+	result := []*HostConfig{}
 	for _, host := range aliasMap {
-		if hostMap[host.Host] {
-			continue
+		values := []string{host.Alias}
+		for _, v := range host.OwnConfig {
+			values = append(values, v)
 		}
-		hostMap[host.Host] = true
 
-		aliases := []string{}
-		for _, pattern := range host.Patterns {
-			aliases = append(aliases, pattern.String())
-		}
-		h := &HostConfig{
-			Aliases: strings.Join(aliases, " "),
-			Config:  map[string]string{},
-			Path:    host.path,
-		}
-		isGlobal := h.Aliases == "*"
-		connectMap := map[string]string{}
-		if !isGlobal {
-			connectMap[User] = ""
-			connectMap[Hostname] = ""
-			connectMap[Port] = ""
-		}
-		values := []string{}
-		values = append(values, aliases...)
-
-		for _, node := range host.Nodes {
-			switch t := node.(type) {
-			case *ssh_config.KV:
-				t.Key = strings.ToLower(t.Key)
-				values = append(values, t.Value)
-				if _, ok := connectMap[t.Key]; ok {
-					connectMap[t.Key] = t.Value
-				} else {
-					h.Config[t.Key] = t.Value
-				}
-				t.SetLeadingSpace(4)
-			}
-		}
-		if isGlobal && len(h.Config) == 0 {
+		if len(lo.Keywords) > 0 && !utils.Query(values, lo.Keywords, lo.IgnoreCase) {
 			continue
 		}
-		if keywords != nil && len(keywords) > 0 && !Query(values, keywords, len(ignoreCase) > 0 && ignoreCase[0]) {
-			continue
-		}
-		if !isGlobal {
-			if connectMap[User] == "" {
-				user, _ := user.Current()
-				connectMap[User] = user.Username
-			}
-			if connectMap[Port] == "" {
-				connectMap[Port] = "22"
-			}
-			h.Connect = FormatConnect(connectMap[User], connectMap[Hostname], connectMap[Port])
-		}
-		hosts = append(hosts, h)
+		result = append(result, host)
 	}
 
 	// Format
@@ -148,221 +171,223 @@ func List(path string, keywords []string, ignoreCase ...bool) ([]*HostConfig, er
 			}
 		}
 	}
-	return hosts, nil
+	return result, nil
+}
+
+type AddOption struct {
+	Path    string
+	Alias   string
+	Connect string
+	Config  map[string]string
 }
 
 // Add ssh host config to ssh config file
-func Add(path string, host *HostConfig, addPath string) error {
-	if addPath == "" {
-		addPath = path
+func Add(p string, ao *AddOption) (*HostConfig, error) {
+	if ao.Path == "" {
+		ao.Path = p
 	}
-	host.Path = addPath
 
-	configMap, aliasMap, err := ParseConfig(path)
+	configMap, aliasMap, err := parseConfig(p)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	if err := checkAlias(aliasMap, false, ao.Alias); err != nil {
+		return nil, err
 	}
 
-	cfg, ok := configMap[addPath]
+	cfg, ok := configMap[ao.Path]
 	if !ok {
-		cfg, err = parseConfig(addPath)
+		cfg, err = readFile(ao.Path)
 		if err != nil {
-			return err
+			return nil, err
 		}
-	}
-
-	isGlobal := host.Aliases == "*"
-	// Alias should not exist. except "*" because it always existing
-	if !isGlobal || (isGlobal && len(aliasMap["*"].Nodes) > 0) {
-		if err := CheckAlias(aliasMap, false, host.Aliases); err != nil {
-			return err
-		}
-	}
-	if host.Config == nil {
-		host.Config = map[string]string{}
 	}
 	nodes := []ssh_config.Node{}
-
+	for k, v := range ao.Config {
+		nodes = append(nodes, (&ssh_config.KV{Key: strings.ToLower(k), Value: v}))
+	}
 	// Parse connect string
-	if host.Connect != "" {
-		user, hostname, port := ParseConnct(host.Connect)
-		host.Connect = FormatConnect(user, hostname, port)
-
-		userKV := &ssh_config.KV{Key: User, Value: user}
-		nodes = append(nodes, userKV.SetLeadingSpace(4))
-
-		hostnameKV := &ssh_config.KV{Key: Hostname, Value: hostname}
-		nodes = append(nodes, hostnameKV.SetLeadingSpace(4))
-
-		portKV := &ssh_config.KV{Key: Port, Value: port}
-		nodes = append(nodes, portKV.SetLeadingSpace(4))
-		delete(host.Config, User)
-		delete(host.Config, Port)
-		delete(host.Config, Hostname)
+	user, hostname, port := utils.ParseConnct(ao.Connect)
+	if user != "" {
+		nodes = append(nodes, (&ssh_config.KV{Key: "user", Value: user}))
 	}
-
-	// Get nodes and delete repeat config
-	for k, v := range host.Config {
-		if v == "" {
-			continue
-		}
-		lk := strings.ToLower(k)
-		node := &ssh_config.KV{Key: lk, Value: v}
-		nodes = append(nodes, node.SetLeadingSpace(4))
+	if hostname != "" {
+		nodes = append(nodes, (&ssh_config.KV{Key: "hostname", Value: hostname}))
 	}
-
-	pattern, err := ssh_config.NewPattern(host.Aliases)
+	if port != "" {
+		nodes = append(nodes, (&ssh_config.KV{Key: "port", Value: port}))
+	}
+	pattern, err := ssh_config.NewPattern(ao.Alias)
 	if err != nil {
-		return nil
-	}
-	patterns := []*ssh_config.Pattern{pattern}
-	newHost := &ssh_config.Host{
-		Patterns: patterns,
-		Nodes:    nodes,
-	}
-	if !isGlobal {
-		cfg.Hosts = append(cfg.Hosts, newHost)
-	} else {
-		*aliasMap["*"].Host = *newHost
+		return nil, err
 	}
 
-	return writeConfig(addPath, cfg)
+	cfg.Hosts = append(cfg.Hosts, &ssh_config.Host{
+		Patterns: []*ssh_config.Pattern{pattern},
+		Nodes:    nodes,
+	})
+	writeConfig(ao.Path, cfg)
+
+	_, aliasMap, err = parseConfig(p)
+	if err != nil {
+		return nil, err
+	}
+	return aliasMap[ao.Alias], nil
+}
+
+type UpdateOption struct {
+	Alias    string
+	NewAlias string
+	Connect  string
+	Config   map[string]string
+}
+
+func (uo *UpdateOption) Valid() bool {
+	return uo.NewAlias != "" || uo.Connect != "" || len(uo.Config) > 0
 }
 
 // Update existing record
-func Update(path string, h *HostConfig, newAlias string) error {
-	configMap, aliasMap, err := ParseConfig(path)
+func Update(p string, uo *UpdateOption) (*HostConfig, error) {
+	configMap, aliasMap, err := parseConfig(p)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if err := CheckAlias(aliasMap, true, h.Aliases); err != nil {
-		return err
+	if err := checkAlias(aliasMap, true, uo.Alias); err != nil {
+		return nil, err
 	}
 
-	updateHost := aliasMap[h.Aliases]
-	h.Path = updateHost.path
-
-	if newAlias != "" {
+	updateHost := aliasMap[uo.Alias]
+	if uo.NewAlias != "" {
 		// new alias should not exist
-		if err := CheckAlias(aliasMap, false, newAlias); err != nil {
-			return err
+		if err := checkAlias(aliasMap, false, uo.NewAlias); err != nil {
+			return nil, err
 		}
-
-		// rename alias
-		for _, pattern := range updateHost.Patterns {
-			if pattern.String() == h.Aliases {
-				pattern.SetStr(newAlias)
-				h.Aliases = newAlias
-			}
-		}
+	} else {
+		uo.NewAlias = uo.Alias
 	}
 
-	updateKV := map[string]string{}
-	if h.Config != nil {
-		for k, v := range h.Config {
-			updateKV[strings.ToLower(k)] = v
+	if uo.Connect != "" {
+		// Parse connect string
+		user, hostname, port := utils.ParseConnct(uo.Connect)
+		if user != "" {
+			updateHost.OwnConfig["user"] = user
+		}
+		if hostname != "" {
+			updateHost.OwnConfig["hostname"] = hostname
+		}
+		if port != "" {
+			updateHost.OwnConfig["port"] = port
 		}
 	}
 
-	if h.Connect != "" {
-		user, hostname, port := ParseConnct(h.Connect)
-		updateKV[User] = user
-		updateKV[Hostname] = hostname
-		updateKV[Port] = port
-	}
-	h.Config = map[string]string{}
-	connectMap := map[string]string{}
-	if h.Aliases != "*" {
-		connectMap[User] = ""
-		connectMap[Hostname] = ""
-		connectMap[Port] = ""
-	}
-
-	// update node
-	for i := 0; i >= 0 && i < len(updateHost.Nodes); i++ {
-		switch t := updateHost.Nodes[i].(type) {
-		case *ssh_config.KV:
-			t.Key = strings.ToLower(t.Key)
-			if value, ok := updateKV[t.Key]; ok {
-				delete(updateKV, t.Key)
-				if value == "" {
-					// Remove node
-					updateHost.Nodes = append(updateHost.Nodes[:i], updateHost.Nodes[i+1:]...)
-					i--
-					continue
-				}
-				t.SetLeadingSpace(4)
-				t.Value = value
-			}
-			if _, ok := connectMap[t.Key]; ok {
-				connectMap[t.Key] = t.Value
-			} else {
-				h.Config[t.Key] = t.Value
-			}
-		}
-	}
-	// append new node
-	for k, v := range updateKV {
+	for k, v := range uo.Config {
 		if v == "" {
-			continue
-		}
-		kv := &ssh_config.KV{Key: k, Value: v}
-		updateHost.Nodes = append(updateHost.Nodes, kv.SetLeadingSpace(4))
-		if _, ok := connectMap[k]; ok {
-			connectMap[k] = v
+			delete(updateHost.OwnConfig, k)
 		} else {
-			h.Config[k] = v
+			updateHost.OwnConfig[k] = v
 		}
 	}
-	if connectMap[User] == "" {
-		user, _ := user.Current()
-		connectMap[User] = user.Username
+
+	for path, hosts := range updateHost.PathMap {
+		for i, host := range hosts {
+			if path == updateHost.Path {
+				pattern, _ := ssh_config.NewPattern(uo.NewAlias)
+				newHost := &ssh_config.Host{
+					Patterns: []*ssh_config.Pattern{pattern},
+				}
+				for k, v := range updateHost.OwnConfig {
+					newHost.Nodes = append(newHost.Nodes, &ssh_config.KV{
+						Key:   k,
+						Value: v,
+					})
+				}
+				if len(host.Patterns) == 1 {
+					if i == 0 {
+						*host = *newHost
+					} else {
+						deleteHostFromConfig(configMap[path], host)
+					}
+				} else {
+					if i == 0 {
+						configMap[path].Hosts = append(configMap[path].Hosts, newHost)
+					}
+					patterns := []*ssh_config.Pattern{}
+					for _, pattern := range host.Patterns {
+						if pattern.String() != uo.NewAlias {
+							patterns = append(patterns, pattern)
+						}
+					}
+					host.Patterns = patterns
+				}
+			} else {
+				if len(host.Patterns) == 1 {
+					deleteHostFromConfig(configMap[path], host)
+				} else {
+					patterns := []*ssh_config.Pattern{}
+					for _, pattern := range host.Patterns {
+						if pattern.String() != uo.NewAlias {
+							patterns = append(patterns, pattern)
+						}
+					}
+					host.Patterns = patterns
+				}
+			}
+			if err := writeConfig(path, configMap[path]); err != nil {
+				return nil, err
+			}
+		}
 	}
-	if connectMap[Port] == "" {
-		connectMap[Port] = "22"
+	_, aliasMap, err = parseConfig(p)
+	if err != nil {
+		return nil, err
 	}
-	h.Connect = FormatConnect(connectMap[User], connectMap[Hostname], connectMap[Port])
-	return writeConfig(updateHost.path, configMap[updateHost.path])
+	return aliasMap[uo.NewAlias], nil
 }
 
 // Delete existing alias record
-func Delete(path string, aliases ...string) error {
-	configMap, aliasMap, err := ParseConfig(path)
+func Delete(p string, aliases ...string) ([]*HostConfig, error) {
+	configMap, aliasMap, err := parseConfig(p)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if err := CheckAlias(aliasMap, true, aliases...); err != nil {
-		return err
-	}
-	deleteAliasMap := map[string]bool{}
-	for _, alias := range aliases {
-		deleteAliasMap[alias] = true
+	if err := checkAlias(aliasMap, true, aliases...); err != nil {
+		return nil, err
 	}
 
-	pathMap := map[string]bool{}
-	for alias, _ := range deleteAliasMap {
-		fp := aliasMap[alias].path
-		if pathMap[fp] {
-			continue
-		}
-		pathMap[fp] = true
-		cfg := configMap[fp]
-		newHosts := []*ssh_config.Host{}
-		for _, host := range cfg.Hosts {
-			newPattern := []*ssh_config.Pattern{}
-			for _, pattern := range host.Patterns {
-				if !deleteAliasMap[pattern.String()] {
-					newPattern = append(newPattern, pattern)
+	deleteHosts := []*HostConfig{}
+	for _, alias := range aliases {
+		deleteHost := aliasMap[alias]
+		deleteHosts = append(deleteHosts, deleteHost)
+		for path, hosts := range deleteHost.PathMap {
+			for _, host := range hosts {
+				if len(host.Patterns) == 1 {
+					deleteHostFromConfig(configMap[path], host)
+				} else {
+					patterns := []*ssh_config.Pattern{}
+					for _, pattern := range host.Patterns {
+						if pattern.String() != alias {
+							patterns = append(patterns, pattern)
+						}
+					}
+					host.Patterns = patterns
 				}
 			}
-			if len(newPattern) > 0 {
-				host.Patterns = newPattern
-				newHosts = append(newHosts, host)
+			if err := writeConfig(path, configMap[path]); err != nil {
+				return nil, err
 			}
 		}
-		cfg.Hosts = newHosts
-		if err := writeConfig(fp, cfg); err != nil {
-			return err
+	}
+
+	return deleteHosts, nil
+}
+
+func checkAlias(aliasMap map[string]*HostConfig, expectExist bool, aliases ...string) error {
+	for _, alias := range aliases {
+		ok := aliasMap[alias] != nil
+		if !ok && expectExist {
+			return fmt.Errorf("alias[%s] not found.", alias)
+		} else if ok && !expectExist {
+			return fmt.Errorf("alias[%s] already exists.", alias)
 		}
 	}
 	return nil
