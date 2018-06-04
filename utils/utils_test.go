@@ -1,4 +1,4 @@
-package manssh
+package utils
 
 import (
 	"os/user"

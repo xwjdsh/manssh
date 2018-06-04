@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/urfave/cli"
-	"github.com/xwjdsh/manssh"
+	"github.com/xwjdsh/manssh/utils"
 )
 
 var (
@@ -23,6 +23,6 @@ func main() {
 
 func flags() []cli.Flag {
 	return []cli.Flag{
-		cli.StringFlag{Name: "file, f", Value: fmt.Sprintf("%s/.ssh/config", manssh.GetHomeDir()), Destination: &path},
+		cli.StringFlag{Name: "file, f", Value: fmt.Sprintf("%s/.ssh/config", utils.GetHomeDir()), Destination: &path},
 	}
 }
