@@ -114,24 +114,3 @@ func delete(c *cli.Context) error {
 	printHosts(c.Bool("path"), hosts)
 	return nil
 }
-
-func backup(c *cli.Context) error {
-	// if err := manssh.ArgumentsCheck(c.NArg(), 1, 1); err != nil {
-	// return printErrorWithHelp(c, err)
-	// }
-
-	// data, err := ioutil.ReadFile(path)
-	// if err != nil {
-	// printErrorFlag()
-	// return cli.NewExitError(err, 1)
-	// }
-	// backupPath := c.Args().First()
-	// err = ioutil.WriteFile(backupPath, data, 0644)
-	// if err != nil {
-	// printErrorFlag()
-	// return cli.NewExitError(err, 1)
-	// }
-	// printSuccessFlag()
-	// printMessage("backup ssh config to [%s] successfully.", backupPath)
-	return nil
-}

@@ -44,11 +44,5 @@ func commands() []cli.Command {
 			Action:  delete,
 			Aliases: []string{"d"},
 		},
-		{
-			Name:    "backup",
-			Usage:   "Backup SSH alias config records",
-			Action:  backup,
-			Aliases: []string{"b"},
-		},
 	}
 }
