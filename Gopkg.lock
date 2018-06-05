@@ -67,7 +67,7 @@
   branch = "master"
   name = "github.com/xwjdsh/ssh_config"
   packages = ["."]
-  revision = "54c0b603346004bad518c0140416afb976ddc6f1"
+  revision = "d719a6261fdfc62fba581d900de45721bede3cc0"
 
 [[projects]]
   branch = "master"
