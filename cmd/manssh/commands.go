@@ -6,19 +6,19 @@ func commands() []cli.Command {
 	return []cli.Command{
 		{
 			Name:    "add",
-			Usage:   "Add a new SSH alias record",
+			Usage:   "Add a new ssh alias record",
 			Action:  add,
 			Aliases: []string{"a"},
 			Flags: []cli.Flag{
 				cli.GenericFlag{Name: "config, c", Value: &kvFlag{}},
 				cli.StringFlag{Name: "identityfile, i"},
 				cli.StringFlag{Name: "addpath, ap", EnvVar: "MANSSH_ADD_PATH"},
-				cli.BoolFlag{Name: "path, p", Usage: "dispay the file path of the alias", EnvVar: "MANSSH_SHOW_PATH"},
+				cli.BoolFlag{Name: "path, p", Usage: "display the file path of the alias", EnvVar: "MANSSH_SHOW_PATH"},
 			},
 		},
 		{
 			Name:    "list",
-			Usage:   "List or query SSH alias records",
+			Usage:   "List all or query ssh alias records",
 			Action:  list,
 			Aliases: []string{"l"},
 			Flags: []cli.Flag{
@@ -28,7 +28,7 @@ func commands() []cli.Command {
 		},
 		{
 			Name:    "update",
-			Usage:   "Update SSH record by specifying alias name",
+			Usage:   "Update the specified ssh alias",
 			Action:  update,
 			Aliases: []string{"u"},
 			Flags: []cli.Flag{
@@ -40,7 +40,7 @@ func commands() []cli.Command {
 		},
 		{
 			Name:    "delete",
-			Usage:   "Delete SSH records by specifying alias names",
+			Usage:   "Delete one or more ssh aliases",
 			Action:  delete,
 			Aliases: []string{"d"},
 		},
