@@ -131,8 +131,8 @@ func parseConfig(p string) (map[string]*ssh_config.Config, map[string]*HostConfi
 	addHosts(p, &ssh_config.Host{
 		Patterns: []*ssh_config.Pattern{(&ssh_config.Pattern{}).SetStr("*")},
 		Nodes: []ssh_config.Node{
-			&ssh_config.KV{Key: "user", Value: utils.GetUsername()},
-			&ssh_config.KV{Key: "port", Value: "22"},
+			ssh_config.NewKV("user", utils.GetUsername()),
+			ssh_config.NewKV("port", "22"),
 		},
 	})
 	return configMap, aliasMap, nil
@@ -204,18 +204,18 @@ func Add(p string, ao *AddOption) (*HostConfig, error) {
 	}
 	nodes := []ssh_config.Node{}
 	for k, v := range ao.Config {
-		nodes = append(nodes, (&ssh_config.KV{Key: strings.ToLower(k), Value: v}))
+		nodes = append(nodes, ssh_config.NewKV(strings.ToLower(k), v))
 	}
 	// Parse connect string
 	user, hostname, port := utils.ParseConnct(ao.Connect)
 	if user != "" {
-		nodes = append(nodes, (&ssh_config.KV{Key: "user", Value: user}))
+		nodes = append(nodes, ssh_config.NewKV("user", user))
 	}
 	if hostname != "" {
-		nodes = append(nodes, (&ssh_config.KV{Key: "hostname", Value: hostname}))
+		nodes = append(nodes, ssh_config.NewKV("hostname", hostname))
 	}
 	if port != "" {
-		nodes = append(nodes, (&ssh_config.KV{Key: "port", Value: port}))
+		nodes = append(nodes, ssh_config.NewKV("port", port))
 	}
 	pattern, err := ssh_config.NewPattern(ao.Alias)
 	if err != nil {
@@ -296,10 +296,7 @@ func Update(p string, uo *UpdateOption) (*HostConfig, error) {
 					Patterns: []*ssh_config.Pattern{pattern},
 				}
 				for k, v := range updateHost.OwnConfig {
-					newHost.Nodes = append(newHost.Nodes, &ssh_config.KV{
-						Key:   k,
-						Value: v,
-					})
+					newHost.Nodes = append(newHost.Nodes, ssh_config.NewKV(k, v))
 				}
 				if len(host.Patterns) == 1 {
 					if i == 0 {
