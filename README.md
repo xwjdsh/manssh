@@ -1,5 +1,6 @@
 # manssh
 
+[![Release](https://img.shields.io/github/release/xwjdsh/manssh.svg?style=flat-square)](https://github.com/xwjdsh/manssh/releases/latest)
 [![Build Status](https://travis-ci.org/xwjdsh/manssh.svg?branch=master)](https://travis-ci.org/xwjdsh/manssh)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xwjdsh/manssh)](https://goreportcard.com/report/github.com/xwjdsh/manssh)
 [![GoCover.io](https://img.shields.io/badge/gocover.io-89.0%25-green.svg)](https://gocover.io/github.com/xwjdsh/manssh)
