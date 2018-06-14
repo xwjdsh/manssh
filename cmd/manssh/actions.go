@@ -15,7 +15,7 @@ var (
 	path string
 )
 
-func list(c *cli.Context) error {
+func listCmd(c *cli.Context) error {
 	hosts, err := manssh.List(path, manssh.ListOption{
 		Keywords:   c.Args(),
 		IgnoreCase: c.Bool("ignorecase"),
@@ -29,7 +29,7 @@ func list(c *cli.Context) error {
 	return nil
 }
 
-func add(c *cli.Context) error {
+func addCmd(c *cli.Context) error {
 	// Check arguments count
 	if err := utils.ArgumentsCheck(c.NArg(), 1, 2); err != nil {
 		return printErrorWithHelp(c, err)
@@ -72,7 +72,7 @@ func add(c *cli.Context) error {
 	return nil
 }
 
-func update(c *cli.Context) error {
+func updateCmd(c *cli.Context) error {
 	if err := utils.ArgumentsCheck(c.NArg(), 1, 2); err != nil {
 		return printErrorWithHelp(c, err)
 	}
@@ -101,7 +101,7 @@ func update(c *cli.Context) error {
 	return nil
 }
 
-func delete(c *cli.Context) error {
+func deleteCmd(c *cli.Context) error {
 	if err := utils.ArgumentsCheck(c.NArg(), 1, -1); err != nil {
 		return printErrorWithHelp(c, err)
 	}

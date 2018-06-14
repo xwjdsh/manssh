@@ -22,7 +22,7 @@ func NewHostConfig(alias, path string, host *ssh_config.Host) *HostConfig {
 	return &HostConfig{
 		Alias:          alias,
 		Path:           path,
-		PathMap:        map[string][]*ssh_config.Host{path: []*ssh_config.Host{host}},
+		PathMap:        map[string][]*ssh_config.Host{path: {host}},
 		OwnConfig:      map[string]string{},
 		ImplicitConfig: map[string]string{},
 	}

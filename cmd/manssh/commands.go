@@ -7,7 +7,7 @@ func commands() []cli.Command {
 		{
 			Name:    "add",
 			Usage:   "Add a new ssh alias record",
-			Action:  add,
+			Action:  addCmd,
 			Aliases: []string{"a"},
 			Flags: []cli.Flag{
 				cli.GenericFlag{Name: "config, c", Value: &kvFlag{}},
@@ -19,7 +19,7 @@ func commands() []cli.Command {
 		{
 			Name:    "list",
 			Usage:   "List all or query ssh alias records",
-			Action:  list,
+			Action:  listCmd,
 			Aliases: []string{"l"},
 			Flags: []cli.Flag{
 				cli.BoolFlag{Name: "ignorecase, ic", Usage: "ignore case while searching"},
@@ -29,7 +29,7 @@ func commands() []cli.Command {
 		{
 			Name:    "update",
 			Usage:   "Update the specified ssh alias",
-			Action:  update,
+			Action:  updateCmd,
 			Aliases: []string{"u"},
 			Flags: []cli.Flag{
 				cli.GenericFlag{Name: "config, c", Value: &kvFlag{}},
@@ -41,7 +41,7 @@ func commands() []cli.Command {
 		{
 			Name:    "delete",
 			Usage:   "Delete one or more ssh aliases",
-			Action:  delete,
+			Action:  deleteCmd,
 			Aliases: []string{"d"},
 		},
 	}

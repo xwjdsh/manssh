@@ -19,8 +19,8 @@ func printErrorWithHelp(c *cli.Context, err error) error {
 }
 
 func printHosts(showPath bool, hosts []*manssh.HostConfig) {
-	aliases := []string{}
-	noConnectAliases := []string{}
+	var aliases  []string
+	var noConnectAliases  []string
 	hostMap := map[string]*manssh.HostConfig{}
 
 	for _, host := range hosts {
@@ -47,8 +47,8 @@ func printHost(showPath bool, host *manssh.HostConfig) {
 	fmt.Printf("\t%s", color.MagentaString(host.Alias))
 	if showPath && len(host.PathMap) > 0 {
 
-		paths := []string{}
-		for path, _ := range host.PathMap {
+		var paths  []string
+		for path := range host.PathMap {
 			if homeDir := utils.GetHomeDir(); strings.HasPrefix(path, homeDir) {
 				path = strings.Replace(path, homeDir, "~", 1)
 			}

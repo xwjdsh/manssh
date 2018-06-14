@@ -25,7 +25,7 @@ func readFile(p string) (*ssh_config.Config, error) {
 }
 
 func deleteHostFromConfig(config *ssh_config.Config, host *ssh_config.Host) {
-	hs := []*ssh_config.Host{}
+	var hs  []*ssh_config.Host
 	for _, h := range config.Hosts {
 		if h == host {
 			continue
@@ -150,7 +150,7 @@ func List(p string, lo ListOption) ([]*HostConfig, error) {
 		return nil, err
 	}
 
-	result := []*HostConfig{}
+	var result  []*HostConfig
 	for _, host := range aliasMap {
 		values := []string{host.Alias}
 		for _, v := range host.OwnConfig {
@@ -202,12 +202,12 @@ func Add(p string, ao *AddOption) (*HostConfig, error) {
 			return nil, err
 		}
 	}
-	nodes := []ssh_config.Node{}
+	var nodes  []ssh_config.Node
 	for k, v := range ao.Config {
 		nodes = append(nodes, ssh_config.NewKV(strings.ToLower(k), v))
 	}
 	// Parse connect string
-	user, hostname, port := utils.ParseConnct(ao.Connect)
+	user, hostname, port := utils.ParseConnect(ao.Connect)
 	if user != "" {
 		nodes = append(nodes, ssh_config.NewKV("user", user))
 	}
@@ -268,7 +268,7 @@ func Update(p string, uo *UpdateOption) (*HostConfig, error) {
 
 	if uo.Connect != "" {
 		// Parse connect string
-		user, hostname, port := utils.ParseConnct(uo.Connect)
+		user, hostname, port := utils.ParseConnect(uo.Connect)
 		if user != "" {
 			updateHost.OwnConfig["user"] = user
 		}
@@ -288,9 +288,9 @@ func Update(p string, uo *UpdateOption) (*HostConfig, error) {
 		}
 	}
 
-	for path, hosts := range updateHost.PathMap {
+	for fp, hosts := range updateHost.PathMap {
 		for i, host := range hosts {
-			if path == updateHost.Path {
+			if fp == updateHost.Path {
 				pattern, _ := ssh_config.NewPattern(uo.NewAlias)
 				newHost := &ssh_config.Host{
 					Patterns: []*ssh_config.Pattern{pattern},
@@ -302,13 +302,13 @@ func Update(p string, uo *UpdateOption) (*HostConfig, error) {
 					if i == 0 {
 						*host = *newHost
 					} else {
-						deleteHostFromConfig(configMap[path], host)
+						deleteHostFromConfig(configMap[fp], host)
 					}
 				} else {
 					if i == 0 {
-						configMap[path].Hosts = append(configMap[path].Hosts, newHost)
+						configMap[fp].Hosts = append(configMap[fp].Hosts, newHost)
 					}
-					patterns := []*ssh_config.Pattern{}
+					var patterns  []*ssh_config.Pattern
 					for _, pattern := range host.Patterns {
 						if pattern.String() != uo.NewAlias {
 							patterns = append(patterns, pattern)
@@ -318,9 +318,9 @@ func Update(p string, uo *UpdateOption) (*HostConfig, error) {
 				}
 			} else {
 				if len(host.Patterns) == 1 {
-					deleteHostFromConfig(configMap[path], host)
+					deleteHostFromConfig(configMap[fp], host)
 				} else {
-					patterns := []*ssh_config.Pattern{}
+					var patterns  []*ssh_config.Pattern
 					for _, pattern := range host.Patterns {
 						if pattern.String() != uo.NewAlias {
 							patterns = append(patterns, pattern)
@@ -329,7 +329,7 @@ func Update(p string, uo *UpdateOption) (*HostConfig, error) {
 					host.Patterns = patterns
 				}
 			}
-			if err := writeConfig(path, configMap[path]); err != nil {
+			if err := writeConfig(fp, configMap[fp]); err != nil {
 				return nil, err
 			}
 		}
@@ -351,16 +351,16 @@ func Delete(p string, aliases ...string) ([]*HostConfig, error) {
 		return nil, err
 	}
 
-	deleteHosts := []*HostConfig{}
+	var deleteHosts  []*HostConfig
 	for _, alias := range aliases {
 		deleteHost := aliasMap[alias]
 		deleteHosts = append(deleteHosts, deleteHost)
-		for path, hosts := range deleteHost.PathMap {
+		for fp, hosts := range deleteHost.PathMap {
 			for _, host := range hosts {
 				if len(host.Patterns) == 1 {
-					deleteHostFromConfig(configMap[path], host)
+					deleteHostFromConfig(configMap[fp], host)
 				} else {
-					patterns := []*ssh_config.Pattern{}
+					var patterns  []*ssh_config.Pattern
 					for _, pattern := range host.Patterns {
 						if pattern.String() != alias {
 							patterns = append(patterns, pattern)
@@ -369,7 +369,7 @@ func Delete(p string, aliases ...string) ([]*HostConfig, error) {
 					host.Patterns = patterns
 				}
 			}
-			if err := writeConfig(path, configMap[path]); err != nil {
+			if err := writeConfig(fp, configMap[fp]); err != nil {
 				return nil, err
 			}
 		}
@@ -382,9 +382,9 @@ func checkAlias(aliasMap map[string]*HostConfig, expectExist bool, aliases ...st
 	for _, alias := range aliases {
 		ok := aliasMap[alias] != nil
 		if !ok && expectExist {
-			return fmt.Errorf("alias[%s] not found.", alias)
+			return fmt.Errorf("alias[%s] not found", alias)
 		} else if ok && !expectExist {
-			return fmt.Errorf("alias[%s] already exists.", alias)
+			return fmt.Errorf("alias[%s] already exists", alias)
 		}
 	}
 	return nil

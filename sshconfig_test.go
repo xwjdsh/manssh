@@ -35,23 +35,23 @@ func TestList(t *testing.T) {
 		return
 	}
 	Convey("init", t, func() {
-		list, err := List(f.Name(), nil)
+		list, err := List(f.Name(), ListOption{})
 		So(err, ShouldBeNil)
 		So(len(list), ShouldEqual, 3)
 
-		list, err = List(f.Name(), []string{"77"})
+		list, err = List(f.Name(), ListOption{Keywords: []string{"77"}})
 		So(err, ShouldBeNil)
 		So(len(list), ShouldEqual, 2)
 
-		list, err = List(f.Name(), []string{"root"})
+		list, err = List(f.Name(), ListOption{Keywords: []string{"root"}})
 		So(err, ShouldBeNil)
 		So(len(list), ShouldEqual, 2)
 
-		list, err = List(f.Name(), []string{"root"}, true)
+		list, err = List(f.Name(), ListOption{Keywords: []string{"root"}, IgnoreCase: true})
 		So(err, ShouldBeNil)
 		So(len(list), ShouldEqual, 3)
 
-		list, err = List(f.Name(), []string{"test", "77", "30"})
+		list, err = List(f.Name(), ListOption{Keywords: []string{"test", "77", "30"}})
 		So(err, ShouldBeNil)
 		So(len(list), ShouldEqual, 1)
 	})
