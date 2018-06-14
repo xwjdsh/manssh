@@ -20,33 +20,32 @@ var (
 func ArgumentsCheck(argCount, min, max int) error {
 	var err error
 	if min > 0 && argCount < min {
-		err = errors.New("too few arguments.")
+		err = errors.New("too few arguments")
 	}
 	if max > 0 && argCount > max {
-		err = errors.New("too many arguments.")
+		err = errors.New("too many arguments")
 	}
 	return err
 }
 
 // Query values contains keys
 func Query(values, keys []string, ignoreCase bool) bool {
-	for _, key := range keys {
-		if !contains(values, key, ignoreCase) {
-			return false
-		}
-	}
-	return true
-}
-
-func contains(values []string, key string, ignoreCase bool) bool {
-	if ignoreCase {
-		key = strings.ToLower(key)
-	}
-	for _, value := range values {
+	contains := func(key string) bool {
 		if ignoreCase {
-			value = strings.ToLower(value)
+			key = strings.ToLower(key)
 		}
-		if strings.Contains(value, key) {
+		for _, value := range values {
+			if ignoreCase {
+				value = strings.ToLower(value)
+			}
+			if strings.Contains(value, key) {
+				return true
+			}
+		}
+		return false
+	}
+	for _, key := range keys {
+		if contains(key) {
 			return true
 		}
 	}
@@ -55,33 +54,33 @@ func contains(values []string, key string, ignoreCase bool) bool {
 
 // GetHomeDir return user's home directory
 func GetHomeDir() string {
-	user, err := user.Current()
-	if nil == err && user.HomeDir != "" {
-		return user.HomeDir
+	u, err := user.Current()
+	if nil == err && u.HomeDir != "" {
+		return u.HomeDir
 	}
 	return os.Getenv("HOME")
 }
 
 func GetUsername() string {
 	username := ""
-	user, err := user.Current()
+	u, err := user.Current()
 	if err == nil {
-		username = user.Username
+		username = u.Username
 	}
 	return username
 }
 
 func SortKeys(m map[string]string) []string {
-	keys := []string{}
-	for k, _ := range m {
+	var keys []string
+	for k := range m {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 	return keys
 }
 
-// ParseConnct parse connect string, format is [user@]host[:port]
-func ParseConnct(connect string) (string, string, string) {
+// ParseConnect parse connect string, format is [user@]host[:port]
+func ParseConnect(connect string) (string, string, string) {
 	var u, hostname, port string
 	hs := strings.SplitN(connect, "@", 2)
 	hostname = hs[0]

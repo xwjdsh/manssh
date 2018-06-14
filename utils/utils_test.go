@@ -1,74 +1,174 @@
 package utils
 
 import (
-	"os/user"
+	"reflect"
 	"testing"
-
-	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestFormatConnect(t *testing.T) {
-	Convey("init", t, func() {
-		So(FormatConnect("root", "1.1.1.1", "22"), ShouldEqual, "root@1.1.1.1:22")
-	})
-}
-
-func TestParseConnct(t *testing.T) {
-	Convey("init", t, func() {
-		currentUser := ""
-		tmp, err := user.Current()
-		if err == nil {
-			currentUser = tmp.Username
-		}
-		u, hostname, port := ParseConnct("root@1.1.1.1:77")
-		So([]string{u, hostname, port}, ShouldResemble, []string{"root", "1.1.1.1", "77"})
-
-		u, hostname, port = ParseConnct("1.1.1.1:77")
-		So([]string{u, hostname, port}, ShouldResemble, []string{currentUser, "1.1.1.1", "77"})
-
-		u, hostname, port = ParseConnct("1.1.1.1")
-		So([]string{u, hostname, port}, ShouldResemble, []string{currentUser, "1.1.1.1", "22"})
-	})
-}
-
 func TestArgumentsCheck(t *testing.T) {
-	Convey("init", t, func() {
-		So(ArgumentsCheck(2, 3, 4), ShouldNotBeNil)
-		So(ArgumentsCheck(2, 1, 1), ShouldNotBeNil)
-		So(ArgumentsCheck(2, 1, 4), ShouldBeNil)
-		So(ArgumentsCheck(2, 2, 2), ShouldBeNil)
-		So(ArgumentsCheck(2, -1, -1), ShouldBeNil)
-	})
+	type args struct {
+		argCount int
+		min      int
+		max      int
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			args:    args{argCount: 1, min: 1, max: 2},
+			wantErr: false,
+		},
+		{
+			args:    args{argCount: 2, min: 1, max: 2},
+			wantErr: false,
+		},
+		{
+			args:    args{argCount: 3, min: 1, max: 2},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ArgumentsCheck(tt.args.argCount, tt.args.min, tt.args.max); (err != nil) != tt.wantErr {
+				t.Errorf("ArgumentsCheck() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }
 
 func TestQuery(t *testing.T) {
-	Convey("init", t, func() {
-		values := []string{"test1", "test2", "another1", "another2"}
-		Convey("check", func() {
-			So(Query(values, []string{"test", "2"}, false), ShouldBeTrue)
-			So(Query(values, []string{"another", "2"}, false), ShouldBeTrue)
-
-			So(Query(values, []string{"TEST", "1"}, false), ShouldBeFalse)
-			So(Query(values, []string{"Another", "1"}, false), ShouldBeFalse)
-
-			So(Query(values, []string{"TEST", "1"}, true), ShouldBeTrue)
-			So(Query(values, []string{"Another", "1"}, true), ShouldBeTrue)
+	type args struct {
+		values     []string
+		keys       []string
+		ignoreCase bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "1",
+			args: args{
+				values: []string{"test1", "test2", "test3"},
+				keys:   []string{"xxx", "test"},
+			},
+			want: true,
+		},
+		{
+			name: "2",
+			args: args{
+				values: []string{"Test1", "Test2", "Test3"},
+				keys:   []string{"test"},
+			},
+			want: false,
+		},
+		{
+			name: "3",
+			args: args{
+				values:     []string{"Test1", "Test2", "Test3"},
+				keys:       []string{"xxx", "test"},
+				ignoreCase: true,
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Query(tt.args.values, tt.args.keys, tt.args.ignoreCase); got != tt.want {
+				t.Errorf("Query() = %v, want %v", got, tt.want)
+			}
 		})
-	})
+	}
 }
 
-func TestCheckAlias(t *testing.T) {
-	Convey("init", t, func() {
-		aliasMap := map[string]*sshConfigHost{
-			"test1": {},
-			"test2": {},
-		}
-		Convey("check", func() {
-			So(CheckAlias(aliasMap, true, "test1", "test2"), ShouldBeNil)
-			So(CheckAlias(aliasMap, true, "test1", "test3"), ShouldNotBeNil)
-
-			So(CheckAlias(aliasMap, false, "test1", "test2"), ShouldNotBeNil)
-			So(CheckAlias(aliasMap, false, "test3", "test4"), ShouldBeNil)
+func TestSortKeys(t *testing.T) {
+	type args struct {
+		m map[string]string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			args: args{
+				m: map[string]string{
+					"ac": "", "ab": "",
+					"cc": "", "cd": "",
+					"bb": "", "ba": "",
+				},
+			},
+			want: []string{"ab", "ac", "ba", "bb", "cc", "cd"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := SortKeys(tt.args.m); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("SortKeys() = %v, want %v", got, tt.want)
+			}
 		})
-	})
+	}
+}
+
+func TestParseConnect(t *testing.T) {
+	type args struct {
+		connect string
+	}
+	tests := []struct {
+		name  string
+		args  args
+		want  string
+		want1 string
+		want2 string
+	}{
+		{
+			args: args{
+				connect: "root@1.2.3.4:22022",
+			},
+			want:  "root",
+			want1: "1.2.3.4",
+			want2: "22022",
+		},
+		{
+			args: args{
+				connect: "root@1.2.3.4",
+			},
+			want:  "root",
+			want1: "1.2.3.4",
+			want2: "",
+		},
+		{
+			args: args{
+				connect: "1.2.3.4",
+			},
+			want:  "",
+			want1: "1.2.3.4",
+			want2: "",
+		},
+		{
+			args: args{
+				connect: "root@1.2.3.4",
+			},
+			want:  "root",
+			want1: "1.2.3.4",
+			want2: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, got2 := ParseConnect(tt.args.connect)
+			if got != tt.want {
+				t.Errorf("ParseConnect() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("ParseConnect() got1 = %v, want %v", got1, tt.want1)
+			}
+			if got2 != tt.want2 {
+				t.Errorf("ParseConnect() got2 = %v, want %v", got2, tt.want2)
+			}
+		})
+	}
 }
