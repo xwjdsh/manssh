@@ -290,13 +290,13 @@ func Update(p string, uo *UpdateOption) (*HostConfig, error) {
 		// Parse connect string
 		user, hostname, port := utils.ParseConnect(uo.Connect)
 		if user != "" {
-			updateHost.OwnConfig["user"] = user
+			uo.Config["user"] = user
 		}
 		if hostname != "" {
-			updateHost.OwnConfig["hostname"] = hostname
+			uo.Config["hostname"] = hostname
 		}
 		if port != "" {
-			updateHost.OwnConfig["port"] = port
+			uo.Config["port"] = port
 		}
 	}
 
@@ -321,6 +321,21 @@ func Update(p string, uo *UpdateOption) (*HostConfig, error) {
 				if len(host.Patterns) == 1 {
 					if i == 0 {
 						*host = *newHost
+						// for implicit "*"
+						find := false
+						for _, h := range configMap[fp].Hosts {
+							if host == h {
+								find = true
+								break
+							}
+						}
+						if !find {
+							newHost.Nodes = []ssh_config.Node{}
+							for k, v := range uo.Config {
+								newHost.Nodes = append(newHost.Nodes, ssh_config.NewKV(k, v))
+							}
+							configMap[fp].Hosts = append(configMap[fp].Hosts, newHost)
+						}
 					} else {
 						deleteHostFromConfig(configMap[fp], host)
 					}
