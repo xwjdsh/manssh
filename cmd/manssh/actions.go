@@ -40,7 +40,6 @@ func addCmd(c *cli.Context) error {
 		Alias:   c.Args().Get(0),
 		Connect: c.Args().Get(1),
 		Path:    c.String("addpath"),
-		Config:  map[string]string{},
 	}
 	if ao.Path != "" {
 		var err error
@@ -52,12 +51,15 @@ func addCmd(c *cli.Context) error {
 	if kvConfig := c.Generic("config"); kvConfig != nil {
 		ao.Config = kvConfig.(*kvFlag).m
 	}
+	if ao.Config == nil {
+		ao.Config = make(map[string]string)
+	}
 
 	if identityfile := c.String("identityfile"); identityfile != "" {
 		ao.Config["identityfile"] = identityfile
 	}
 
-	if ao.Config == nil && ao.Connect == "" {
+	if len(ao.Config) == 0 && ao.Connect == "" {
 		return printErrorWithHelp(c, errors.New("param error"))
 	}
 
@@ -81,11 +83,13 @@ func updateCmd(c *cli.Context) error {
 	uo := &manssh.UpdateOption{
 		Alias:    c.Args().Get(0),
 		Connect:  c.Args().Get(1),
-		Config:   map[string]string{},
 		NewAlias: c.String("rename"),
 	}
 	if kvConfig := c.Generic("config"); kvConfig != nil {
 		uo.Config = kvConfig.(*kvFlag).m
+	}
+	if uo.Config == nil {
+		uo.Config = make(map[string]string)
 	}
 
 	if identityfile := c.String("identityfile"); identityfile != "" || c.IsSet("identityfile") {
