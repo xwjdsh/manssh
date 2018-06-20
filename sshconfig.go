@@ -138,8 +138,11 @@ func parseConfig(p string) (map[string]*ssh_config.Config, map[string]*HostConfi
 	return configMap, aliasMap, nil
 }
 
+// ListOption options for List
 type ListOption struct {
-	Keywords   []string
+	// Keywords set Keyword filter records
+	Keywords []string
+	// IgnoreCase ignore case
 	IgnoreCase bool
 }
 
@@ -174,11 +177,16 @@ func List(p string, lo ListOption) ([]*HostConfig, error) {
 	return result, nil
 }
 
+// AddOption options for Add
 type AddOption struct {
-	Path    string
-	Alias   string
+	// Path add path
+	Path string
+	// Alias alias
+	Alias string
+	// Connect connection string
 	Connect string
-	Config  map[string]string
+	// Config other config
+	Config map[string]string
 }
 
 // Add ssh host config to ssh config file
@@ -235,13 +243,19 @@ func Add(p string, ao *AddOption) (*HostConfig, error) {
 	return aliasMap[ao.Alias], nil
 }
 
+// UpdateOption options for Update
 type UpdateOption struct {
-	Alias    string
+	// Alias alias
+	Alias string
+	// NewAlias new alias
 	NewAlias string
-	Connect  string
-	Config   map[string]string
+	// Connect connection string
+	Connect string
+	// Config other config
+	Config map[string]string
 }
 
+// Valid whether the option is valid
 func (uo *UpdateOption) Valid() bool {
 	return uo.NewAlias != "" || uo.Connect != "" || len(uo.Config) > 0
 }
@@ -378,6 +392,7 @@ func Delete(p string, aliases ...string) ([]*HostConfig, error) {
 	return deleteHosts, nil
 }
 
+// GetFilePaths get file paths
 func GetFilePaths(p string) ([]string, error) {
 	configMap, _, err := parseConfig(p)
 	if err != nil {

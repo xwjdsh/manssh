@@ -57,7 +57,7 @@ func printHost(showPath bool, host *manssh.HostConfig) {
 		sort.Strings(paths)
 		fmt.Printf("(%s)", strings.Join(paths, " "))
 	}
-	if connect := host.ConnectStr(); connect != "" {
+	if connect := host.ConnectionStr(); connect != "" {
 		fmt.Printf(" -> %s", connect)
 	}
 	fmt.Println()

@@ -9,15 +9,19 @@ import (
 
 // HostConfig struct include alias, connect string and other config
 type HostConfig struct {
+	// Alias alias
 	Alias string
 	// Path found in which file
-	Path    string
+	Path string
+	// PathMap key is file path, value is the alias's hosts
 	PathMap map[string][]*ssh_config.Host
-
-	OwnConfig      map[string]string
+	// OwnConfig own config
+	OwnConfig map[string]string
+	// ImplicitConfig implicit config
 	ImplicitConfig map[string]string
 }
 
+// NewHostConfig new HostConfig
 func NewHostConfig(alias, path string, host *ssh_config.Host) *HostConfig {
 	return &HostConfig{
 		Alias:          alias,
@@ -28,7 +32,8 @@ func NewHostConfig(alias, path string, host *ssh_config.Host) *HostConfig {
 	}
 }
 
-func (hc *HostConfig) ConnectStr() string {
+// ConnectionStr return the connection string
+func (hc *HostConfig) ConnectionStr() string {
 	if !hc.Display() {
 		return ""
 	}
@@ -65,6 +70,7 @@ func (hc *HostConfig) ConnectStr() string {
 	return fmt.Sprintf("%s%s%s%s%s", user, color.GreenString("@"), hostname, color.GreenString(":"), port)
 }
 
+// Display Whether to display connection string
 func (hc *HostConfig) Display() bool {
 	hostname := hc.OwnConfig["hostname"]
 	if hostname == "" {

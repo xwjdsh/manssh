@@ -12,8 +12,10 @@ import (
 )
 
 var (
+	// SuccessFlag success flag
 	SuccessFlag = color.GreenString("✔ ")
-	ErrorFlag   = color.RedString("✗ ")
+	// ErrorFlag error flag
+	ErrorFlag = color.RedString("✗ ")
 )
 
 // ArgumentsCheck check arguments count correctness
@@ -61,6 +63,7 @@ func GetHomeDir() string {
 	return os.Getenv("HOME")
 }
 
+// GetUsername return current username
 func GetUsername() string {
 	username := ""
 	u, err := user.Current()
@@ -70,6 +73,7 @@ func GetUsername() string {
 	return username
 }
 
+// SortKeys sort map keys
 func SortKeys(m map[string]string) []string {
 	var keys []string
 	for k := range m {

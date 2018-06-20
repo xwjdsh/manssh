@@ -91,6 +91,9 @@ func updateCmd(c *cli.Context) error {
 	if identityfile := c.String("identityfile"); identityfile != "" || c.IsSet("identityfile") {
 		uo.Config["identityfile"] = identityfile
 	}
+	if !uo.Valid() {
+		return cli.NewExitError("the update option is invalid", 1)
+	}
 
 	host, err := manssh.Update(path, uo)
 	if err != nil {
