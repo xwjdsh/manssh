@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/xwjdsh/manssh"
@@ -96,7 +98,7 @@ func updateCmd(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 
-	fmt.Printf("%s updated successfully.\n\n", utils.SuccessFlag)
+	fmt.Printf("%s updated successfully\n\n", utils.SuccessFlag)
 	printHost(c.Bool("path"), host)
 	return nil
 }
@@ -110,7 +112,28 @@ func deleteCmd(c *cli.Context) error {
 		fmt.Printf(utils.ErrorFlag)
 		return cli.NewExitError(err, 1)
 	}
-	fmt.Printf("%s deleted successfully.\n\n", utils.SuccessFlag)
+	fmt.Printf("%s deleted successfully\n\n", utils.SuccessFlag)
 	printHosts(c.Bool("path"), hosts)
+	return nil
+}
+
+func backupCmd(c *cli.Context) error {
+	if err := utils.ArgumentsCheck(c.NArg(), 1, 1); err != nil {
+		return printErrorWithHelp(c, err)
+	}
+	backupPath := c.Args().First()
+	os.MkdirAll(backupPath, os.ModePerm)
+
+	paths, err := manssh.GetFilePaths(path)
+	if err != nil {
+		return cli.NewExitError(err, 1)
+	}
+	for _, path := range paths {
+		np := filepath.Join(backupPath, filepath.Base(path))
+		if err := exec.Command("cp", path, np).Run(); err != nil {
+			return cli.NewExitError(err, 1)
+		}
+	}
+	fmt.Printf("%s backup ssh config to [%s] successfully\n", utils.SuccessFlag, backupPath)
 	return nil
 }

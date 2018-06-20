@@ -25,7 +25,7 @@ func readFile(p string) (*ssh_config.Config, error) {
 }
 
 func deleteHostFromConfig(config *ssh_config.Config, host *ssh_config.Host) {
-	var hs  []*ssh_config.Host
+	var hs []*ssh_config.Host
 	for _, h := range config.Hosts {
 		if h == host {
 			continue
@@ -150,7 +150,7 @@ func List(p string, lo ListOption) ([]*HostConfig, error) {
 		return nil, err
 	}
 
-	var result  []*HostConfig
+	var result []*HostConfig
 	for _, host := range aliasMap {
 		values := []string{host.Alias}
 		for _, v := range host.OwnConfig {
@@ -202,7 +202,7 @@ func Add(p string, ao *AddOption) (*HostConfig, error) {
 			return nil, err
 		}
 	}
-	var nodes  []ssh_config.Node
+	var nodes []ssh_config.Node
 	for k, v := range ao.Config {
 		nodes = append(nodes, ssh_config.NewKV(strings.ToLower(k), v))
 	}
@@ -308,7 +308,7 @@ func Update(p string, uo *UpdateOption) (*HostConfig, error) {
 					if i == 0 {
 						configMap[fp].Hosts = append(configMap[fp].Hosts, newHost)
 					}
-					var patterns  []*ssh_config.Pattern
+					var patterns []*ssh_config.Pattern
 					for _, pattern := range host.Patterns {
 						if pattern.String() != uo.NewAlias {
 							patterns = append(patterns, pattern)
@@ -320,7 +320,7 @@ func Update(p string, uo *UpdateOption) (*HostConfig, error) {
 				if len(host.Patterns) == 1 {
 					deleteHostFromConfig(configMap[fp], host)
 				} else {
-					var patterns  []*ssh_config.Pattern
+					var patterns []*ssh_config.Pattern
 					for _, pattern := range host.Patterns {
 						if pattern.String() != uo.NewAlias {
 							patterns = append(patterns, pattern)
@@ -351,7 +351,7 @@ func Delete(p string, aliases ...string) ([]*HostConfig, error) {
 		return nil, err
 	}
 
-	var deleteHosts  []*HostConfig
+	var deleteHosts []*HostConfig
 	for _, alias := range aliases {
 		deleteHost := aliasMap[alias]
 		deleteHosts = append(deleteHosts, deleteHost)
@@ -360,7 +360,7 @@ func Delete(p string, aliases ...string) ([]*HostConfig, error) {
 				if len(host.Patterns) == 1 {
 					deleteHostFromConfig(configMap[fp], host)
 				} else {
-					var patterns  []*ssh_config.Pattern
+					var patterns []*ssh_config.Pattern
 					for _, pattern := range host.Patterns {
 						if pattern.String() != alias {
 							patterns = append(patterns, pattern)
@@ -376,6 +376,18 @@ func Delete(p string, aliases ...string) ([]*HostConfig, error) {
 	}
 
 	return deleteHosts, nil
+}
+
+func GetFilePaths(p string) ([]string, error) {
+	configMap, _, err := parseConfig(p)
+	if err != nil {
+		return nil, err
+	}
+	paths := make([]string, 0, len(configMap))
+	for path := range configMap {
+		paths = append(paths, path)
+	}
+	return paths, nil
 }
 
 func checkAlias(aliasMap map[string]*HostConfig, expectExist bool, aliases ...string) error {

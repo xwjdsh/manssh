@@ -210,3 +210,11 @@ func TestDelete(t *testing.T) {
 	require.NotNil(t, hostMap["*"])
 	require.Equal(t, "22", hostMap["main1"].ImplicitConfig["port"])
 }
+
+func TestGetFilePaths(t *testing.T) {
+	initConfig()
+	defer os.Remove(configRootDir)
+	paths, err := GetFilePaths(mainConfigPath)
+	require.Nil(t, err)
+	require.Equal(t, 3, len(paths))
+}
