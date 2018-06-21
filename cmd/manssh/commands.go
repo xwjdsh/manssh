@@ -43,6 +43,9 @@ func commands() []cli.Command {
 			Usage:   "Delete one or more ssh aliases",
 			Action:  deleteCmd,
 			Aliases: []string{"d"},
+			Flags: []cli.Flag{
+				cli.BoolFlag{Name: "path, p", Usage: "dispay the file path of the alias", EnvVar: "MANSSH_SHOW_PATH"},
+			},
 		},
 		{
 			Name:    "backup",

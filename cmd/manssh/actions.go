@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/xwjdsh/manssh"
 	"github.com/xwjdsh/manssh/utils"
@@ -135,9 +136,14 @@ func backupCmd(c *cli.Context) error {
 	if err != nil {
 		return cli.NewExitError(err, 1)
 	}
-	for _, path := range paths {
-		np := filepath.Join(backupPath, filepath.Base(path))
-		if err := exec.Command("cp", path, np).Run(); err != nil {
+	pathDir := filepath.Dir(path)
+	for _, p := range paths {
+		bp := backupPath
+		if p != path && strings.HasPrefix(p, pathDir) {
+			bp = filepath.Join(bp, strings.Replace(p, pathDir, "", 1))
+			os.MkdirAll(filepath.Dir(bp), os.ModePerm)
+		}
+		if err := exec.Command("cp", p, bp).Run(); err != nil {
 			return cli.NewExitError(err, 1)
 		}
 	}
