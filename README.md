@@ -9,6 +9,10 @@
 
 manssh is a command line tool for managing your ssh alias config easily, inspired by [storm](https://github.com/emre/storm) project, powered by Go.
 
+Note:<br/>
+This project is actually a simple glue project, the most complex and core parsing ssh config file logic implements by [ssh_config](https://github.com/kevinburke/ssh_config), I didn't do much.<br/>
+At first it was just a imitation of [storm](https://github.com/apache/storm), now it has become a little different.
+
 ![](https://raw.githubusercontent.com/xwjdsh/manssh/master/screenshot/manssh.gif)
 
 ## Feature
@@ -16,7 +20,7 @@ manssh is a command line tool for managing your ssh alias config easily, inspire
 * No dependence.
 * Add, list, query, delete ssh alias record.
 * Backup ssh config.
-
+* [Support Include directive.](#for-include-directive)
 
 ## Install
 
@@ -56,7 +60,7 @@ COMMANDS:
      list, l    List or query SSH alias records
      update, u  Update SSH record by specifying alias name
      delete, d  Delete SSH records by specifying alias names
-     backup, b  Backup SSH alias config records
+     backup, b  Backup SSH config files
      help, h    Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
@@ -117,6 +121,35 @@ Rename the alias specified by `-r` flag.
 ```
 % manssh backup ./config_backup
 ✔ backup ssh config to [./config_backup] successfully.
+```
+
+## For Include directive
+If you use the `Include` directive, there are some extra notes.
+
+Add `-p`(--path) flag for `list`,`add`,`update`,`delete` command to show the file path where the alias is located, it can also be set by the **MANSSH_SHOW_PATH** environment variable.
+
+<details>
+<summary><strong><code>MANSSH_SHOW_PATH</code></strong></summary>
+
+Set to `true` to show the file path where the alias is located. Default is `false`.
+</details>
+<br/>
+
+Add `-ap`(--addpath) flag for `add` command to specify the file path to which the alias is added, it can also be set by the **MANSSH_ADD_PATH** environment variable.
+
+<details>
+<summary><strong><code>MANSSH_ADD_PATH</code></strong></summary>
+
+This file path indicates to which file to add the alias. Default is the entry config file.
+</details>
+<br/>
+
+For convenience, you can export these environments in your `.zshrc` or `.bashrc`,
+example:
+
+```bash
+export MANSSH_SHOW_PATH=true
+export MANSSH_ADD_PATH=~/.ssh/config.d/temp
 ```
 
 ## Thanks
