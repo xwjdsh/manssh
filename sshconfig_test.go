@@ -126,6 +126,7 @@ func TestAdd(t *testing.T) {
 		Path:    testConfigPath,
 		Alias:   "test1",
 		Connect: "xxx@1.2.3.4:11",
+		Config:  map[string]string{},
 	})
 	require.NotNil(t, err)
 
@@ -133,6 +134,7 @@ func TestAdd(t *testing.T) {
 		Path:    testConfigPath,
 		Alias:   "test4",
 		Connect: "xxx@1.2.3.4",
+		Config:  map[string]string{},
 	})
 	require.Nil(t, err)
 	require.Equal(t, "22022", host.ImplicitConfig["port"])
@@ -171,6 +173,7 @@ func TestUpdate(t *testing.T) {
 	host, err = Update(mainConfigPath, &UpdateOption{
 		Alias:   "home1",
 		Connect: "1.2.3.4:11",
+		Config:  map[string]string{},
 	})
 	require.Nil(t, err)
 	require.Equal(t, "1.2.3.4", host.OwnConfig["hostname"])
