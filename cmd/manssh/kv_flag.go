@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -30,6 +29,10 @@ func (kv *kvFlag) String() string {
 	if kv == nil {
 		return ""
 	}
-	jsonBytes, _ := json.Marshal(kv)
-	return string(jsonBytes)
+
+	item := make([]string, len(kv.m))
+	for k, v := range kv.m {
+		item = append(item, k+"="+v)
+	}
+	return strings.Join(item, ",")
 }

@@ -65,8 +65,8 @@ var (
 )
 
 func initConfig() {
-	os.MkdirAll(configRootDir, os.ModePerm)
-	os.MkdirAll(filepath.Join(configRootDir, "config.d"), os.ModePerm)
+	_ = os.MkdirAll(configRootDir, os.ModePerm)
+	_ = os.MkdirAll(filepath.Join(configRootDir, "config.d"), os.ModePerm)
 	if err := ioutil.WriteFile(mainConfigPath, []byte(fmt.Sprintf(mainConfigContent, configRootDir)), 0644); err != nil {
 		panic(err)
 	}
@@ -109,12 +109,14 @@ func TestList(t *testing.T) {
 	hosts, err = List(mainConfigPath, ListOption{
 		Keywords: []string{"Test"},
 	})
+	require.Nil(t, err)
 	require.Equal(t, 1, len(hosts))
 
 	hosts, err = List(mainConfigPath, ListOption{
 		Keywords:   []string{"Test"},
 		IgnoreCase: true,
 	})
+	require.Nil(t, err)
 	require.Equal(t, 3, len(hosts))
 }
 

@@ -130,7 +130,9 @@ func backupCmd(c *cli.Context) error {
 		return printErrorWithHelp(c, err)
 	}
 	backupPath := c.Args().First()
-	os.MkdirAll(backupPath, os.ModePerm)
+	if err := os.MkdirAll(backupPath, os.ModePerm); err != nil {
+		return cli.NewExitError(err, 1)
+	}
 
 	paths, err := manssh.GetFilePaths(path)
 	if err != nil {
@@ -141,7 +143,9 @@ func backupCmd(c *cli.Context) error {
 		bp := backupPath
 		if p != path && strings.HasPrefix(p, pathDir) {
 			bp = filepath.Join(bp, strings.Replace(p, pathDir, "", 1))
-			os.MkdirAll(filepath.Dir(bp), os.ModePerm)
+			if err := os.MkdirAll(filepath.Dir(bp), os.ModePerm); err != nil {
+				return cli.NewExitError(err, 1)
+			}
 		}
 		if err := exec.Command("cp", p, bp).Run(); err != nil {
 			return cli.NewExitError(err, 1)

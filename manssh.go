@@ -243,7 +243,9 @@ func Add(p string, ao *AddOption) (*HostConfig, error) {
 		Patterns: []*ssh_config.Pattern{pattern},
 		Nodes:    nodes,
 	})
-	writeConfig(ao.Path, cfg)
+	if err := writeConfig(ao.Path, cfg); err != nil {
+		return nil, err
+	}
 
 	_, aliasMap, err = parseConfig(p)
 	if err != nil {

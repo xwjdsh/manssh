@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/urfave/cli"
+
 	"github.com/xwjdsh/manssh/utils"
 )
 
@@ -18,7 +20,9 @@ func main() {
 	app.Version = version
 	app.Flags = flags()
 	app.Commands = commands()
-	app.Run(os.Args)
+	if err := app.Run(os.Args); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func flags() []cli.Flag {

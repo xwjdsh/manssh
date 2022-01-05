@@ -13,7 +13,9 @@ import (
 )
 
 func printErrorWithHelp(c *cli.Context, err error) error {
-	cli.ShowSubcommandHelp(c)
+	if err := cli.ShowSubcommandHelp(c); err != nil {
+		return err
+	}
 	fmt.Println()
 	return cli.NewExitError(err, 1)
 }
