@@ -1,10 +1,10 @@
-FROM golang:1.10 as builder
+FROM golang:1.17 as builder
 ARG VERSION
 WORKDIR /go/src/github.com/xwjdsh/manssh
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags "-X main.version=${VERSION}" -o manssh ./cmd/manssh
+RUN go build -a -installsuffix cgo -ldflags "-X main.version=${VERSION}" ./cmd/manssh
 
-FROM alpine:latest  
+FROM alpine:3.15
 LABEL maintainer="iwendellsun@gmail.com"
 WORKDIR /
 COPY --from=builder /go/src/github.com/xwjdsh/manssh/manssh .
