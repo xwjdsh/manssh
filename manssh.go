@@ -119,16 +119,19 @@ func parseConfig(p string) (map[string]*ssh_config.Config, map[string]*HostConfi
 	configMap := map[string]*ssh_config.Config{p: cfg}
 
 	for _, host := range cfg.Hosts {
+		isInclude := false
 		for _, node := range host.Nodes {
 			switch t := node.(type) {
 			case *ssh_config.Include:
+				isInclude = true
 				for fp, config := range t.GetFiles() {
 					configMap[fp] = config
 					addHosts(aliasMap, fp, config.Hosts...)
 				}
-			case *ssh_config.KV:
-				addHosts(aliasMap, p, host)
 			}
+		}
+		if !isInclude {
+			addHosts(aliasMap, p, host)
 		}
 	}
 	addHosts(aliasMap, p, &ssh_config.Host{
