@@ -3,8 +3,6 @@ package manssh
 import (
 	"fmt"
 
-	"github.com/fatih/color"
-
 	"github.com/xwjdsh/ssh_config"
 )
 
@@ -48,7 +46,6 @@ func (hc *HostConfig) ConnectionStr() string {
 		user = hc.ImplicitConfig["user"]
 		delete(hc.ImplicitConfig, "user")
 	} else {
-		user = color.GreenString(user)
 		delete(hc.OwnConfig, "user")
 	}
 
@@ -56,7 +53,6 @@ func (hc *HostConfig) ConnectionStr() string {
 		delete(hc.ImplicitConfig, "hostname")
 		hostname = hc.ImplicitConfig["hostname"]
 	} else {
-		hostname = color.GreenString(hostname)
 		delete(hc.OwnConfig, "hostname")
 	}
 
@@ -64,11 +60,10 @@ func (hc *HostConfig) ConnectionStr() string {
 		port = hc.ImplicitConfig["port"]
 		delete(hc.ImplicitConfig, "port")
 	} else {
-		port = color.GreenString(port)
 		delete(hc.OwnConfig, "port")
 	}
 
-	return fmt.Sprintf("%s%s%s%s%s", user, color.GreenString("@"), hostname, color.GreenString(":"), port)
+	return fmt.Sprintf("%s@%s:%s", user, hostname, port)
 }
 
 // Display Whether to display connection string
