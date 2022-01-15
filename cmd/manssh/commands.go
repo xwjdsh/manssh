@@ -53,5 +53,13 @@ func commands() []cli.Command {
 			Action:  backupCmd,
 			Aliases: []string{"b"},
 		},
+		{
+			Name:   "web",
+			Usage:  "Run the web server",
+			Action: webCmd,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "addr", Value: "localhost:9900"},
+			},
+		},
 	}
 }

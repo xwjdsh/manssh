@@ -10,6 +10,7 @@ import (
 
 	"github.com/xwjdsh/manssh"
 	"github.com/xwjdsh/manssh/utils"
+	"github.com/xwjdsh/manssh/web"
 
 	"github.com/urfave/cli"
 )
@@ -153,4 +154,16 @@ func backupCmd(c *cli.Context) error {
 	}
 	fmt.Printf("%s backup ssh config to [%s] successfully\n", utils.SuccessFlag, backupPath)
 	return nil
+}
+
+func webCmd(c *cli.Context) error {
+	addr := c.String("addr")
+	if !strings.Contains(addr, ":") {
+		addr = "localhost:" + addr
+	} else if strings.HasPrefix(addr, ":") {
+		addr = "localhost" + addr
+	}
+
+	fmt.Printf("Running at: http://%s\n", addr)
+	return web.Serve(path, addr)
 }

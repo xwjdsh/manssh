@@ -9,15 +9,15 @@ import (
 // HostConfig struct include alias, connect string and other config
 type HostConfig struct {
 	// Alias alias
-	Alias string
+	Alias string `json:"alias"`
 	// Path found in which file
-	Path string
+	Path string `json:"path"`
 	// PathMap key is file path, value is the alias's hosts
-	PathMap map[string][]*ssh_config.Host
+	PathMap map[string][]*ssh_config.Host `json:"-"`
 	// OwnConfig own config
-	OwnConfig map[string]string
+	OwnConfig map[string]string `json:"own_config"`
 	// ImplicitConfig implicit config
-	ImplicitConfig map[string]string
+	ImplicitConfig map[string]string `json:"implicit_config"`
 }
 
 // NewHostConfig new HostConfig
