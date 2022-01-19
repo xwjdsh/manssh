@@ -15,9 +15,9 @@ type HostConfig struct {
 	// PathMap key is file path, value is the alias's hosts
 	PathMap map[string][]*ssh_config.Host `json:"-"`
 	// OwnConfig own config
-	OwnConfig map[string]string `json:"own_config"`
+	OwnConfig map[string]string `json:"own_config,omitempty"`
 	// ImplicitConfig implicit config
-	ImplicitConfig map[string]string `json:"implicit_config"`
+	ImplicitConfig map[string]string `json:"implicit_config,omitempty"`
 }
 
 // NewHostConfig new HostConfig

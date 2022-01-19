@@ -59,6 +59,7 @@ func commands() []cli.Command {
 			Action: webCmd,
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "addr", Value: "localhost:9900"},
+				cli.BoolFlag{Name: "cors"},
 			},
 		},
 	}

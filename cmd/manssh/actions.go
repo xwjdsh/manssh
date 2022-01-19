@@ -165,5 +165,5 @@ func webCmd(c *cli.Context) error {
 	}
 
 	fmt.Printf("Running at: http://%s\n", addr)
-	return web.Serve(path, addr)
+	return web.Serve(path, addr, c.Bool("cors"))
 }
