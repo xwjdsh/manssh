@@ -10,7 +10,6 @@ import (
 
 	"github.com/xwjdsh/manssh"
 	"github.com/xwjdsh/manssh/utils"
-	"github.com/xwjdsh/manssh/web"
 
 	"github.com/urfave/cli"
 )
@@ -165,5 +164,5 @@ func webCmd(c *cli.Context) error {
 	}
 
 	fmt.Printf("Running at: http://%s\n", addr)
-	return web.Serve(path, addr, c.Bool("cors"))
+	return manssh.WebServe(path, addr, c.Bool("cors"))
 }
