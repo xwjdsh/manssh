@@ -10,6 +10,8 @@ import (
 type HostConfig struct {
 	// Alias alias
 	Alias string `json:"alias"`
+	// Connection connection
+	Connection string `json:"connection"`
 	// Path found in which file
 	Path string `json:"path"`
 	// PathMap key is file path, value is the alias's hosts
@@ -31,8 +33,7 @@ func NewHostConfig(alias, path string, host *ssh_config.Host) *HostConfig {
 	}
 }
 
-// ConnectionStr return the connection string
-func (hc *HostConfig) ConnectionStr() string {
+func (hc *HostConfig) connectionStr() string {
 	if !hc.Display() {
 		return ""
 	}
@@ -44,23 +45,12 @@ func (hc *HostConfig) ConnectionStr() string {
 
 	if user, ok = hc.OwnConfig["user"]; !ok {
 		user = hc.ImplicitConfig["user"]
-		delete(hc.ImplicitConfig, "user")
-	} else {
-		delete(hc.OwnConfig, "user")
 	}
-
 	if hostname, ok = hc.OwnConfig["hostname"]; !ok {
-		delete(hc.ImplicitConfig, "hostname")
 		hostname = hc.ImplicitConfig["hostname"]
-	} else {
-		delete(hc.OwnConfig, "hostname")
 	}
-
 	if port, ok = hc.OwnConfig["port"]; !ok {
 		port = hc.ImplicitConfig["port"]
-		delete(hc.ImplicitConfig, "port")
-	} else {
-		delete(hc.OwnConfig, "port")
 	}
 
 	return fmt.Sprintf("%s@%s:%s", user, hostname, port)

@@ -2,7 +2,7 @@
   <div class="container">
     <Header
       @toggle-add-record="toggleAddRecord"
-      title="Task Tracker"
+      title="SSH aliases"
       :showAddRecord="showAddRecord"
     />
     <div v-show="showAddRecord">
@@ -71,7 +71,7 @@ body {
   font-family: "Poppins", sans-serif;
 }
 .container {
-  max-width: 500px;
+  max-width: 800px;
   margin: 30px auto;
   overflow: auto;
   min-height: 300px;

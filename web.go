@@ -47,7 +47,7 @@ func (h *webHandler) listRecords(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	sort.Slice(records, func(i, j int) bool {
-		return records[i].Alias < records[j].Alias
+		return records[i].Alias > records[j].Alias
 	})
 
 	h.resp(w, &Resp{Data: records})

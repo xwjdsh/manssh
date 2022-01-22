@@ -104,6 +104,7 @@ func addHosts(aliasMap map[string]*HostConfig, fp string, hosts ...*ssh_config.H
 
 			setImplicitConfig(aliasMap, hc)
 			setOwnConfig(aliasMap, hc, host)
+			hc.Connection = hc.connectionStr()
 		}
 	}
 }
