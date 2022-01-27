@@ -2,7 +2,7 @@
   <div class="container">
     <Header
       @toggle-add-record="toggleAddRecord"
-      title="SSH aliases"
+      title="SSH Aliases"
       :showAddRecord="showAddRecord"
     />
     <div v-show="showAddRecord">
@@ -40,8 +40,9 @@ export default {
     addRecord(record) {
       this.records = [...this.records, record];
     },
-    deleteRecord(alias) {
+    async deleteRecord(alias) {
       if (confirm("Are you sure?")) {
+        await fetch("api/record/" + alias, { method: "DELETE" });
         this.records = this.records.filter((record) => record.alias !== alias);
       }
     },

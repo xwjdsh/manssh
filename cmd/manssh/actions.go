@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/xwjdsh/manssh"
@@ -155,14 +156,27 @@ func backupCmd(c *cli.Context) error {
 	return nil
 }
 
-func webCmd(c *cli.Context) error {
-	addr := c.String("addr")
-	if !strings.Contains(addr, ":") {
-		addr = "localhost:" + addr
-	} else if strings.HasPrefix(addr, ":") {
-		addr = "localhost" + addr
-	}
+func open(url string) error {
+	var cmd string
+	var args []string
 
-	fmt.Printf("Running at: http://%s\n", addr)
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
+	}
+	args = append(args, url)
+	return exec.Command(cmd, args...).Start()
+}
+
+func webCmd(c *cli.Context) error {
+	addr := fmt.Sprintf("%s:%d", c.String("bind"), c.Int("port"))
+	url := fmt.Sprintf("http://%s", addr)
+	fmt.Printf("Running at: %s\n", url)
+	go open(url)
 	return manssh.WebServe(path, addr, c.Bool("cors"))
 }

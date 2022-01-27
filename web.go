@@ -31,6 +31,7 @@ func WebServe(path string, addr string, cors bool) error {
 		return err
 	}
 	router.HandleFunc("/api/records", h.listRecords).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/api/record/{key}", h.deleteRecord).Methods(http.MethodDelete, http.MethodOptions)
 	router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.FS(htmlContent))))
 	return http.ListenAndServe(addr, router)
 }
@@ -54,10 +55,30 @@ func (h *webHandler) listRecords(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
+func (h *webHandler) deleteRecord(w http.ResponseWriter, req *http.Request) {
+	key := mux.Vars(req)["key"]
+	if key == "" {
+		h.resp(w, &Resp{Err: "key is empty"})
+		return
+	}
+	_, err := Delete(h.path, key)
+	if err != nil {
+		h.resp(w, &Resp{Err: err.Error()})
+		return
+	}
+
+	h.resp(w, nil)
+	return
+}
+
 func (h *webHandler) resp(w http.ResponseWriter, r *Resp) {
 	if h.cors {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	}
+	if r == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")

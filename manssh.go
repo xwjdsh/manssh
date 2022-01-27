@@ -104,7 +104,6 @@ func addHosts(aliasMap map[string]*HostConfig, fp string, hosts ...*ssh_config.H
 
 			setImplicitConfig(aliasMap, hc)
 			setOwnConfig(aliasMap, hc, host)
-			hc.Connection = hc.connectionStr()
 		}
 	}
 }
@@ -142,6 +141,16 @@ func parseConfig(p string) (map[string]*ssh_config.Config, map[string]*HostConfi
 			ssh_config.NewKV("port", "22"),
 		},
 	})
+
+	for _, hc := range aliasMap {
+		if hc.Display() {
+			hc.Connection = hc.connectionStr()
+			delete(hc.OwnConfig, "user")
+			delete(hc.OwnConfig, "hostname")
+			delete(hc.OwnConfig, "port")
+		}
+	}
+
 	return configMap, aliasMap, nil
 }
 

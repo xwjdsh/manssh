@@ -3,7 +3,7 @@
     <h1>{{ title }}</h1>
     <Button
       @btn-click="$emit('toggle-add-record')"
-      :text="showAddRecord ? 'Close' : 'Add Record'"
+      :text="showAddRecord ? 'Close' : 'New'"
       :color="showAddRecord ? 'red' : 'green'"
     />
   </header>

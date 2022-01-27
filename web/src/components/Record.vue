@@ -3,19 +3,26 @@
     <h3>
       {{ record.alias }}
       {{ record.connection ? "-> " + record.connection : "" }}
-      <i @click="$emit('delete-record', record.alias)" class="fas fa-times"></i>
+      <i
+        v-if="record.connection"
+        @click="$emit('delete-record', record.alias)"
+        class="fas fa-times"
+      ></i>
     </h3>
-    own_config:
-    <div
-      class="own_config"
-      :key="key"
-      v-for="key in Object.keys(record.own_config)"
-    >
-      <p>{{ key }} = {{ record.own_config[key] }}</p>
+    <div v-if="record.own_config">
+      <div
+        class="own_config"
+        :key="key"
+        v-for="key in Object.keys(record.own_config)"
+      >
+        <p>{{ key }} = {{ record.own_config[key] }}</p>
+      </div>
     </div>
-    implicit_config:
-    <div :key="key" v-for="key in Object.keys(record.implicit_config)">
-      <p>{{ key }} = {{ record.implicit_config[key] }}</p>
+    <div v-if="record.implicit_config">
+      implicit_config:
+      <div :key="key" v-for="key in Object.keys(record.implicit_config)">
+        <p>{{ key }} = {{ record.implicit_config[key] }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -25,7 +32,6 @@ export default {
   name: "Record",
   data() {
     return {
-      connection: "",
       edit: false,
     };
   },
