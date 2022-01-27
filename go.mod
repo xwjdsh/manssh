@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/fatih/color v1.6.0
+	github.com/gorilla/mux v1.8.0
 	github.com/stretchr/testify v1.2.2
 	github.com/urfave/cli v1.20.0
 	github.com/xwjdsh/ssh_config v0.0.0-20180621174215-55799930d02f

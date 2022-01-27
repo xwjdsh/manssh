@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/xwjdsh/manssh"
@@ -153,4 +154,29 @@ func backupCmd(c *cli.Context) error {
 	}
 	fmt.Printf("%s backup ssh config to [%s] successfully\n", utils.SuccessFlag, backupPath)
 	return nil
+}
+
+func open(url string) error {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
+	}
+	args = append(args, url)
+	return exec.Command(cmd, args...).Start()
+}
+
+func webCmd(c *cli.Context) error {
+	addr := fmt.Sprintf("%s:%d", c.String("bind"), c.Int("port"))
+	url := fmt.Sprintf("http://%s", addr)
+	fmt.Printf("Running at: %s\n", url)
+	go open(url)
+	return manssh.WebServe(path, addr, c.Bool("cors"))
 }
