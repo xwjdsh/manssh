@@ -3,6 +3,7 @@ module github.com/xwjdsh/manssh
 go 1.17
 
 require (
+	github.com/StephenBrown2/ssh_config v0.0.0-20220210203636-036f61b9d304
 	github.com/fatih/color v1.6.0
 	github.com/stretchr/testify v1.2.2
 	github.com/urfave/cli v1.20.0

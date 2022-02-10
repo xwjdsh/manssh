@@ -1,3 +1,5 @@
+github.com/StephenBrown2/ssh_config v0.0.0-20220210203636-036f61b9d304 h1:8hAMVQVab9hnIUPWdC9EpjQ4hQZ2cFA1IWTcVK6OFlc=
+github.com/StephenBrown2/ssh_config v0.0.0-20220210203636-036f61b9d304/go.mod h1:+xBtisLP9jShhZEbtomFsY6e/rvCwloqPf1qbA1HCaU=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fatih/color v1.6.0 h1:66qjqZk8kalYAvDRtM1AdAJQI0tj4Wrue3Eq3B3pmFU=

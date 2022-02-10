@@ -7,6 +7,7 @@ import (
 
 	"github.com/xwjdsh/manssh"
 	"github.com/xwjdsh/manssh/utils"
+	"github.com/StephenBrown2/ssh_config"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -68,6 +69,7 @@ func printHost(showPath bool, host *manssh.HostConfig) {
 		if value == "" {
 			continue
 		}
+		key = ssh_config.GetCanonicalCase(key)
 		color.Cyan("\t    %s = %s\n", key, value)
 	}
 	for _, key := range utils.SortKeys(host.ImplicitConfig) {
@@ -75,6 +77,7 @@ func printHost(showPath bool, host *manssh.HostConfig) {
 		if value == "" {
 			continue
 		}
+		key = ssh_config.GetCanonicalCase(key)
 		fmt.Printf("\t    %s = %s\n", key, value)
 	}
 	fmt.Println()
