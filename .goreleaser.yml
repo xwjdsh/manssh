@@ -1,29 +1,43 @@
-# Build customization
+# This is an example .goreleaser.yml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
 builds:
-  - binary: manssh
+  - env:
+      - CGO_ENABLED=0
     main: ./cmd/manssh
     goos:
-      - darwin
       - linux
-    goarch:
-      - amd64
-
-brew:
-  github:
-    owner: xwjdsh
-    name: homebrew-tap
-
-  commit_author:
-    name: Wendell Sun
-    email: iwendellsun@gmail.com
-
-  homepage: "https://github.com/xwjdsh/manssh"
-  description: "Manage your ssh alias configs easily"
-
-  install: |
-    bin.install "manssh"
-
-release:
-  github:
-    owner: xwjdsh
-    name: manssh
+      - windows
+      - darwin
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+brews:
+  - tap:
+      owner: xwjdsh
+      name: homebrew-tap
+    commit_author:
+      name: Wendell Sun
+      email: iwendellsun@gmail.com
+    homepage: "https://github.com/xwjdsh/manssh"
+    description: "Manage your ssh alias configs easily"
+    license: "MIT"
+    install: |
+      bin.install "manssh"
