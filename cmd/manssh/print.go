@@ -7,7 +7,7 @@ import (
 
 	"github.com/xwjdsh/manssh"
 	"github.com/xwjdsh/manssh/utils"
-	"github.com/StephenBrown2/ssh_config"
+	"github.com/xwjdsh/ssh_config"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli"

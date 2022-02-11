@@ -1,5 +1,3 @@
-github.com/StephenBrown2/ssh_config v0.0.0-20220210203636-036f61b9d304 h1:8hAMVQVab9hnIUPWdC9EpjQ4hQZ2cFA1IWTcVK6OFlc=
-github.com/StephenBrown2/ssh_config v0.0.0-20220210203636-036f61b9d304/go.mod h1:+xBtisLP9jShhZEbtomFsY6e/rvCwloqPf1qbA1HCaU=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fatih/color v1.6.0 h1:66qjqZk8kalYAvDRtM1AdAJQI0tj4Wrue3Eq3B3pmFU=
@@ -10,15 +8,13 @@ github.com/mattn/go-colorable v0.0.9 h1:UVL0vNpWh04HeJXV0KLcaT7r06gOH2l4OW6ddYRU
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-isatty v0.0.3 h1:ns/ykhmWi7G9O+8a448SecJU3nSMBXJfqQkl0upE1jI=
 github.com/mattn/go-isatty v0.0.3/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
-github.com/pelletier/go-buffruneio v0.2.0 h1:U4t4R6YkofJ5xHm3dJzuRpPZ0mr5MMCoAWooScCR7aA=
-github.com/pelletier/go-buffruneio v0.2.0/go.mod h1:JkE26KsDizTr40EUHkXVtNPvgGtbSNq5BcowyYOWdKo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/urfave/cli v1.20.0 h1:fDqGv3UG/4jbVl/QkFwEdddtEDjh/5Ov6X+0B/3bPaw=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
-github.com/xwjdsh/ssh_config v0.0.0-20180621174215-55799930d02f h1:EFg9tPfTWezWokNgPhIuuygLG+OgJQGlsBUPzgB6g64=
-github.com/xwjdsh/ssh_config v0.0.0-20180621174215-55799930d02f/go.mod h1:6xndeVlkEiRvT4jjfb0b8yhU6M8+Mkh5dmvSUILKy/I=
+github.com/xwjdsh/ssh_config v0.0.0-20220211060505-936c636e637e h1:WO3MRhEvVnOPqXs97VpmnEqHksO7BMdhhOt/hfONBYM=
+github.com/xwjdsh/ssh_config v0.0.0-20220211060505-936c636e637e/go.mod h1:NuVEthmy5UVVrQFoZDXmf5lGTZMQ0IF0vHTzh21y6vs=
 golang.org/x/sys v0.0.0-20180202135801-37707fdb30a5 h1:MF92a0wJ3gzSUVBpjcwdrDr5+klMFRNEEu6Mev4n00I=
 golang.org/x/sys v0.0.0-20180202135801-37707fdb30a5/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
