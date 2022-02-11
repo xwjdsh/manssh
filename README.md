@@ -24,9 +24,14 @@ At first it was just a imitation of [storm](https://github.com/emre/storm), now 
 
 ## Install
 
-#### Gopher
+#### Go
+Before 1.17
 ```shell
 go get -u github.com/xwjdsh/manssh/cmd/manssh
+```
+1.17 or higher
+```
+go install github.com/xwjdsh/manssh/cmd/manssh
 ```
 
 #### Homebrew
